@@ -533,7 +533,7 @@ function App() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <div className="text-sm text-slate-300">70.3 Road to April 26</div>
+            <div className="text-sm text-slate-300">Peñiscola Half Ironman · 26 April 2026</div>
             <div className="text-2xl sm:text-3xl font-semibold tracking-tight">
               HIRONMAN training dashboard
             </div>

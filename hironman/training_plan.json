@@ -99,7 +99,7 @@
       "sessions": [
         {"type": "Swim", "title": "Feel the Water", "description": "20 min easy + 4x50m sprints."},
         {"type": "Run", "title": "Leg Opener", "description": "15 min easy + 4 strides."},
-        {"type": "Race", "title": "Ironman 70.3", "description": "Target: 1:35 Half Marathon (4:30 pace)."}
+        {"type": "Race", "title": "Peñiscola Half Ironman", "description": "Target: 1:35 Half Marathon (4:30 pace)."}
       ],
       "daily_targets": {
         "Friday": "Carb Load Day 1: 750g Carbs",

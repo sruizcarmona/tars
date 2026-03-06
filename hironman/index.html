@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>70.3 Road to April 26</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .completed { text-decoration: line-through; opacity: 0.5; }
+        .easter-peak { border: 2px solid #f59e0b; background-color: #fffbeb; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900">
+
+<div class="max-w-4xl mx-auto py-10 px-4">
+    <header class="mb-10 text-center">
+        <h1 class="text-4xl font-bold text-blue-800">70.3 Race Dashboard</h1>
+        <p class="text-lg text-gray-600 mt-2">Race Day: <span class="font-bold text-red-600">April 26, 2026</span></p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+            <h3 class="text-sm uppercase font-bold text-gray-400">Run PB</h3>
+            <p class="text-2xl font-mono">1:27:00</p>
+            <p class="text-xs text-blue-600">Target Race Pace: 4:30/km</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-green-500">
+            <h3 class="text-sm uppercase font-bold text-gray-400">Swim PB</h3>
+            <p class="text-2xl font-mono">15:00 / 1km</p>
+            <p class="text-xs text-green-600">Target CSS: 1:28/100m</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-yellow-500">
+            <h3 class="text-sm uppercase font-bold text-gray-400">Bike Baseline</h3>
+            <p class="text-2xl font-mono">30 km/h</p>
+            <p class="text-xs text-yellow-600">Hilly Course Capacity</p>
+        </div>
+    </div>
+
+    <div id="plan-container" class="space-y-6">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Week 1: Strength & Foundation</h2>
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">CURRENT</span>
+            </div>
+            <ul class="space-y-3">
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Swim:</strong> 10x100m CSS @ 1:28 (15s rest) + 4x200m Fins</span></li>
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Gym:</strong> Heavy Squats/Deadlifts + 30m Power Bike</span></li>
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Run:</strong> 12km Steady (4km @ 4:07/km pace)</span></li>
+            </ul>
+        </div>
+
+        <div class="easter-peak p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-amber-800">Week 3: Easter Course Overload (1/2)</h2>
+                <span class="bg-amber-200 text-amber-900 text-xs font-semibold px-2.5 py-0.5 rounded">PEAK</span>
+            </div>
+            <ul class="space-y-3">
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Ride 1:</strong> 60km Course Recon (Focus on climbs)</span></li>
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Ride 2:</strong> 90km Endurance (70g Carb/hr test)</span></li>
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Swim:</strong> 5x200m CSS Endurance</span></li>
+            </ul>
+        </div>
+
+        <div class="easter-peak p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-amber-800">Week 4: The Dress Rehearsal</h2>
+                <span class="bg-amber-200 text-amber-900 text-xs font-semibold px-2.5 py-0.5 rounded">PEAK</span>
+            </div>
+            <ul class="space-y-3 text-sm">
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>The Big Brick:</strong> 70km Course Bike + 8km Run @ 4:30/km</span></li>
+                <li class="flex items-center"><input type="checkbox" class="mr-3"> <span><strong>Recovery:</strong> Mobility & Core only (No heavy lifting)</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mt-10 bg-gray-800 text-white p-8 rounded-2xl">
+        <h2 class="text-2xl font-bold mb-4">Race Day Fueling Strategy</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-300">
+            <div>
+                <h4 class="text-yellow-400 font-bold mb-2">The Bike (90km)</h4>
+                <p>75g Carbs / Hour</p>
+                <p class="text-sm italic">Example: 2 Gels + 1 bottle Sports Drink every hour.</p>
+            </div>
+            <div>
+                <h4 class="text-yellow-400 font-bold mb-2">The Run (21.1km)</h4>
+                <p>Target Pace: 4:30 min/km</p>
+                <p class="text-sm italic">Gel every 35 mins. Walk through aid stations to ensure hydration.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic for toggling completion styles
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if(this.checked) {
+                this.nextElementSibling.classList.add('completed');
+            } else {
+                this.nextElementSibling.classList.remove('completed');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

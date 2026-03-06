@@ -1,0 +1,111 @@
+{
+  "athlete": {
+    "weight_kg": 75,
+    "race_date": "2026-04-26",
+    "goal_run_pace": "4:30 min/km",
+    "benchmarks": {
+      "hm_pb": "1:27:00",
+      "swim_1km": "15:00",
+      "bike_40km": "30km/h"
+    }
+  },
+  "taper_protocol": {
+    "carb_load_target": "10g/kg",
+    "start_date": "2026-04-24",
+    "notes": "Focus on low-fiber carbs: white rice, pasta, pretzels, sports drinks."
+  },
+  "training_plan": {
+    "phases": [
+    {
+      "weeks": [1, 2],
+      "name": "Strength & Power",
+      "focus": "Pre-fatiguing legs and building force for hills"
+    },
+    {
+      "weeks": [3, 4],
+      "name": "Easter Course Overload",
+      "focus": "Specific course mastery and metabolic testing"
+    },
+    {
+      "weeks": [5, 6],
+      "name": "Consolidation & Sharpness",
+      "focus": "Maintaining engine while shedding fatigue"
+    },
+    {
+      "week": 7,
+      "name": "Taper",
+      "focus": "Carb loading and CNS recovery"
+    }
+  ],
+  "weekly_schedule": [
+    {
+      "week": 1,
+      "sessions": [
+        {"type": "Swim", "title": "CSS Intervals", "description": "10x100m @ 1:28-1:30 (15s rest) + 4x200m Fins"},
+        {"type": "Gym", "title": "Heavy Strength", "description": "4x8 Heavy Goblet Squats, Deadlifts, Bulgarian Split Squats"},
+        {"type": "Run", "title": "Maintenance Tempo", "description": "12km Steady (include 4km @ 4:07/km)"},
+        {"type": "Bike", "title": "Stationary Power", "description": "30m High Resistance (8/10 effort) - Indoor"}
+      ]
+    },
+    {
+      "week": 2,
+      "sessions": [
+        {"type": "Swim", "title": "CSS Endurance", "description": "5x200m @ 1:32 (20s rest) + 400m Mixed drills"},
+        {"type": "Gym", "title": "Heavy Strength", "description": "Repeat Week 1 + Core Plank Circuit"},
+        {"type": "Bike", "title": "The Road Ride", "description": "2h Hilly Course (Constant pedaling, no coasting)"},
+        {"type": "Run", "title": "Hill Repeats", "description": "45m run including 8x30s sprints uphill"}
+      ]
+    },
+    {
+      "week": 3,
+      "name": "Easter 1",
+      "sessions": [
+        {"type": "Bike", "title": "Course Recon", "description": "60km Course ride. Memorize gear changes on steep climbs."},
+        {"type": "Run", "title": "Aerobic Base", "description": "15km Steady @ 4:50-5:00 pace."},
+        {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls)."},
+        {"type": "Brick", "title": "Short Brick", "description": "40km Bike + 5km Run @ 4:30 pace."}
+      ]
+    },
+    {
+      "week": 4,
+      "name": "Easter 2",
+      "sessions": [
+        {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition."},
+        {"type": "Brick", "title": "Big Brick Dress Rehearsal", "description": "70km Course Bike + 8km Run @ 4:30 pace."},
+        {"type": "Swim", "title": "CSS Peak", "description": "10x100m @ 1:25 (Aggressive pace) + 200m easy."},
+        {"type": "Gym", "title": "Mobility", "description": "Foam roll and core. No heavy weights."}
+      ]
+    },
+    {
+      "week": 5,
+      "sessions": [
+        {"type": "Run", "title": "Intervals", "description": "8x800m @ 3:55/km (90s rest)."},
+        {"type": "Swim", "title": "Strength", "description": "4x400m Pull Buoy/Paddles (Slow & Strong)."},
+        {"type": "Gym", "title": "Explosive", "description": "Box jumps and Squat jumps (Low volume)."},
+        {"type": "Bike", "title": "Stationary Sweet Spot", "description": "45m (2x15m Hard effort)."}
+      ]
+    },
+    {
+      "week": 6,
+      "sessions": [
+        {"type": "Run", "title": "Race Pace", "description": "10km @ 4:30/km."},
+        {"type": "Swim", "title": "Taper Starts", "description": "1,000m Easy mixed."},
+        {"type": "Bike", "title": "Spinning", "description": "45m high cadence (90+ RPM)."}
+      ]
+    },
+    {
+      "week": 7,
+      "name": "Race Week",
+      "sessions": [
+        {"type": "Swim", "title": "Feel the Water", "description": "20 min easy + 4x50m sprints."},
+        {"type": "Run", "title": "Leg Opener", "description": "15 min easy + 4 strides."},
+        {"type": "Race", "title": "Ironman 70.3", "description": "Target: 1:35 Half Marathon (4:30 pace)."}
+      ],
+      "daily_targets": {
+        "Friday": "Carb Load Day 1: 750g Carbs",
+        "Saturday": "Carb Load Day 2: 750g Carbs + 15m easy run",
+        "Sunday": "RACE DAY: Start 07:00. Nutrition: 75g/hr on bike."
+      }
+    }
+  ]}
+}

@@ -1,0 +1,36 @@
+{
+  "sessions": [
+    { "id": "w1-s0-1-0-swim-css-intervals", "completed": false },
+    { "id": "w1-s1-1-1-gym-heavy-strength", "completed": false },
+    { "id": "w1-s2-1-2-run-maintenance-tempo", "completed": false },
+    { "id": "w1-s3-1-3-bike-stationary-power", "completed": false },
+
+    { "id": "w2-s0-2-0-swim-css-endurance", "completed": false },
+    { "id": "w2-s1-2-1-gym-heavy-strength", "completed": false },
+    { "id": "w2-s2-2-2-bike-the-road-ride", "completed": false },
+    { "id": "w2-s3-2-3-run-hill-repeats", "completed": false },
+
+    { "id": "w3-s0-3-0-bike-course-recon", "completed": false },
+    { "id": "w3-s1-3-1-run-aerobic-base", "completed": false },
+    { "id": "w3-s2-3-2-swim-open-water-simulation", "completed": false },
+    { "id": "w3-s3-3-3-brick-short-brick", "completed": false },
+
+    { "id": "w4-s0-4-0-bike-full-distance-test", "completed": false },
+    { "id": "w4-s1-4-1-brick-big-brick-dress-rehearsal", "completed": false },
+    { "id": "w4-s2-4-2-swim-css-peak", "completed": false },
+    { "id": "w4-s3-4-3-gym-mobility", "completed": false },
+
+    { "id": "w5-s0-5-0-run-intervals", "completed": false },
+    { "id": "w5-s1-5-1-swim-strength", "completed": false },
+    { "id": "w5-s2-5-2-gym-explosive", "completed": false },
+    { "id": "w5-s3-5-3-bike-stationary-sweet-spot", "completed": false },
+
+    { "id": "w6-s0-6-0-run-race-pace", "completed": false },
+    { "id": "w6-s1-6-1-swim-taper-starts", "completed": false },
+    { "id": "w6-s2-6-2-bike-spinning", "completed": false },
+
+    { "id": "w7-s0-7-0-swim-feel-the-water", "completed": false },
+    { "id": "w7-s1-7-1-run-leg-opener", "completed": false },
+    { "id": "w7-s2-7-2-race-ironman-70-3", "completed": false }
+  ]
+}

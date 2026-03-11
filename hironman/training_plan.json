@@ -19,22 +19,26 @@
     {
       "weeks": [1, 2],
       "name": "Strength & Power",
-      "focus": "Pre-fatiguing legs and building force for hills"
+      "focus": "Pre-fatiguing legs and building force for hills",
+      "start_date": "2026-03-09"
     },
     {
       "weeks": [3, 4],
       "name": "Easter Course Overload",
-      "focus": "Specific course mastery and metabolic testing"
+      "focus": "Specific course mastery and metabolic testing",
+      "start_date": "2026-03-23"
     },
     {
       "weeks": [5, 6],
       "name": "Consolidation & Sharpness",
-      "focus": "Maintaining engine while shedding fatigue"
+      "focus": "Maintaining engine while shedding fatigue",
+      "start_date": "2026-04-06"
     },
     {
       "week": 7,
       "name": "Taper",
-      "focus": "Carb loading and CNS recovery"
+      "focus": "Carb loading and CNS recovery",
+      "start_date": "2026-04-20"
     }
   ],
   "weekly_schedule": [
@@ -50,6 +54,7 @@
     },
     {
       "week": 2,
+      "start_date": "2026-03-16",
       "sessions": [
         {"type": "Swim", "title": "CSS Endurance", "description": "5x200m @ 1:32 (20s rest) + 400m Mixed drills"},
         {"type": "Gym", "title": "Heavy Strength", "description": "Repeat Week 1 + Core Plank Circuit"},
@@ -60,6 +65,7 @@
     {
       "week": 3,
       "name": "Easter 1",
+      "start_date": "2026-03-23",
       "sessions": [
         {"type": "Bike", "title": "Course Recon", "description": "60km Course ride. Memorize gear changes on steep climbs."},
         {"type": "Run", "title": "Aerobic Base", "description": "15km Steady @ 4:50-5:00 pace."},
@@ -70,6 +76,7 @@
     {
       "week": 4,
       "name": "Easter 2",
+      "start_date": "2026-03-30",
       "sessions": [
         {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition."},
         {"type": "Brick", "title": "Big Brick Dress Rehearsal", "description": "70km Course Bike + 8km Run @ 4:30 pace."},
@@ -79,6 +86,7 @@
     },
     {
       "week": 5,
+      "start_date": "2026-04-06",
       "sessions": [
         {"type": "Run", "title": "Intervals", "description": "8x800m @ 3:55/km (90s rest)."},
         {"type": "Swim", "title": "Strength", "description": "4x400m Pull Buoy/Paddles (Slow & Strong)."},
@@ -88,6 +96,7 @@
     },
     {
       "week": 6,
+      "start_date": "2026-04-13",
       "sessions": [
         {"type": "Run", "title": "Race Pace", "description": "10km @ 4:30/km."},
         {"type": "Swim", "title": "Taper Starts", "description": "1,000m Easy mixed."},
@@ -97,6 +106,7 @@
     {
       "week": 7,
       "name": "Race Week",
+      "start_date": "2026-04-20",
       "sessions": [
         {"type": "Swim", "title": "Feel the Water", "description": "20 min easy + 4x50m sprints."},
         {"type": "Run", "title": "Leg Opener", "description": "15 min easy + 4 strides."},

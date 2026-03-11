@@ -323,6 +323,11 @@ function WeekCard({ week, phase, completions, onToggle }) {
             <div className="flex flex-wrap items-center gap-2">
               <div className="text-sm text-slate-300">Week</div>
               <div className="text-lg font-semibold">#{week.week}</div>
+              {week.start_date ? (
+                <span className="text-xs rounded-full bg-emerald-500/10 ring-1 ring-emerald-400/20 px-2 py-1 text-emerald-100">
+                  Starts {week.start_date}
+                </span>
+              ) : null}
               {week.name ? (
                 <span className="text-xs rounded-full bg-white/5 ring-1 ring-white/10 px-2 py-1 text-slate-200">
                   {week.name}

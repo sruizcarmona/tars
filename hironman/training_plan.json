@@ -43,7 +43,7 @@
       "sessions": [
         {"type": "Swim", "title": "CSS Intervals", "description": "10x100m @ 1:28-1:30 (15s rest) + 4x200m Fins"},
         {"type": "Gym", "title": "Heavy Strength", "description": "4x8 Heavy Goblet Squats, Deadlifts, Bulgarian Split Squats"},
-        {"type": "Run", "title": "Maintenance Tempo", "description": "12km Steady (include 4km @ 4:07/km)"},
+        {"type": "Run", "title": "Maintenance Tempo", "description": "8km in 40min (include 3km @ 4:30)"},
         {"type": "Bike", "title": "Stationary Power", "description": "30m High Resistance (8/10 effort) - Indoor"}
       ]
     },

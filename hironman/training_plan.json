@@ -40,6 +40,7 @@
   "weekly_schedule": [
     {
       "week": 1,
+      "start_date": "2026-03-09",
       "sessions": [
         {"type": "Swim", "title": "CSS Intervals", "description": "10x100m @ 1:28-1:30 (15s rest) + 4x200m Fins"},
         {"type": "Gym", "title": "Heavy Strength", "description": "4x8 Heavy Goblet Squats, Deadlifts, Bulgarian Split Squats"},

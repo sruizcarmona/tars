@@ -58,7 +58,7 @@
       "sessions": [
         {"type": "Swim", "title": "CSS Endurance", "description": "5x200m @ 1:32 (20s rest) + 400m Mixed drills"},
         {"type": "Gym", "title": "Heavy Strength", "description": "Repeat Week 1 + Core Plank Circuit"},
-        {"type": "Bike", "title": "The Road Ride", "description": "2h Hilly Course (Constant pedaling, no coasting)"},
+        {"type": "Brick", "title": "Gym Brick Session", "description": "Bike + Run brick at the gym"},
         {"type": "Run", "title": "Hill Repeats", "description": "45m run including 8x30s sprints uphill"}
       ]
     },

@@ -297,7 +297,7 @@ function CountdownCard({ raceDateStr }) {
         ))}
       </div>
       {done ? (
-        <div className="mt-3 text-sm text-emerald-200">It’s race day. Execute.</div>
+        <div className="mt-3 text-sm text-emerald-200">It's race day. Execute.</div>
       ) : (
         <div className="mt-3 text-sm text-slate-300">
           Keep stacking sessions; the last 2 weeks count the most.
@@ -420,20 +420,19 @@ function WeekCard({ week, phase, completions, onToggle }) {
 function App() {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
-  const [completions, setCompletions] = useState(() => {
+  const [localOverrides, setLocalOverrides] = useState(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     return safeJsonParse(raw, {}) || {};
   });
-  const [serverCompletions, setServerCompletions] = useState(null);
 
   const saveTimer = useRef(null);
   useEffect(() => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(completions));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localOverrides));
     }, 120);
     return () => clearTimeout(saveTimer.current);
-  }, [completions]);
+  }, [localOverrides]);
 
   useEffect(() => {
     let cancelled = false;
@@ -456,60 +455,25 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("./sessions.json", { cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) {
-          if (r.status === 404) return null;
-          throw new Error(`Failed to load sessions.json (HTTP ${r.status})`);
-        }
-        return r.json();
-      })
-      .then((json) => {
-        if (cancelled) return;
-        if (!json) {
-          setServerCompletions(null);
-          return;
-        }
-        if (Array.isArray(json.sessions)) {
-          const map = {};
-          json.sessions.forEach((s) => {
-            if (!s || !s.id) return;
-            map[s.id] = !!s.completed;
-          });
-          setServerCompletions(map);
-        } else {
-          const map = {};
-          Object.keys(json || {}).forEach((k) => {
-            const v = json[k];
-            if (v && typeof v === "object" && "completed" in v) {
-              map[k] = !!v.completed;
-            } else {
-              map[k] = !!v;
-            }
-          });
-          setServerCompletions(map);
-        }
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setServerCompletions(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const schedule = plan?.training_plan?.weekly_schedule || [];
   const phases = plan?.training_plan?.phases || [];
 
-  const effectiveCompletions = useMemo(() => {
-    return {
-      ...(serverCompletions || {}),
-      ...(completions || {}),
-    };
-  }, [serverCompletions, completions]);
+  // Build completions map from training_plan.json + local overrides
+  const completions = useMemo(() => {
+    const map = {};
+    // First, read from training_plan.json
+    schedule.forEach((w) => {
+      (w.sessions || []).forEach((s, idx) => {
+        const id = getSessionId(w.week, idx, s);
+        map[id] = !!s.completed;
+      });
+    });
+    // Then apply local overrides
+    Object.entries(localOverrides).forEach(([id, val]) => {
+      map[id] = !!val;
+    });
+    return map;
+  }, [schedule, localOverrides]);
 
   const completionSummary = useMemo(() => {
     let total = 0;
@@ -518,19 +482,19 @@ function App() {
       (w.sessions || []).forEach((s, idx) => {
         total += 1;
         const id = getSessionId(w.week, idx, s);
-        if (effectiveCompletions[id]) done += 1;
+        if (completions[id]) done += 1;
       });
     });
     return { total, done };
-  }, [schedule, effectiveCompletions]);
+  }, [schedule, completions]);
 
   function onToggle(id) {
-    setCompletions((prev) => ({ ...prev, [id]: !prev[id] }));
+    setLocalOverrides((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   function onReset() {
     localStorage.removeItem(STORAGE_KEY);
-    setCompletions({});
+    setLocalOverrides({});
   }
 
   return (
@@ -560,7 +524,7 @@ function App() {
 
         {error ? (
           <div className="mt-6 rounded-2xl bg-rose-500/10 ring-1 ring-rose-400/20 p-4 text-rose-100">
-            <div className="font-semibold">Couldn’t load `training_plan.json`</div>
+            <div className="font-semibold">Couldn't load `training_plan.json`</div>
             <div className="mt-1 text-sm text-rose-100/90">{error}</div>
           </div>
         ) : null}
@@ -575,7 +539,7 @@ function App() {
                   key={`week-${w.week}`}
                   week={w}
                   phase={getPhaseForWeek(phases, w.week)}
-                  completions={effectiveCompletions}
+                  completions={completions}
                   onToggle={onToggle}
                 />
               ))}
@@ -583,7 +547,7 @@ function App() {
 
           <div className="space-y-4 lg:sticky lg:top-6 h-fit">
             <CountdownCard raceDateStr={plan?.athlete?.race_date} />
-            <ConfidenceGauge plan={plan} completions={effectiveCompletions} />
+            <ConfidenceGauge plan={plan} completions={completions} />
 
             <div className="rounded-2xl bg-slate-900/70 shadow-lg shadow-slate-900/40 ring-1 ring-white/10 p-4">
               <div className="text-sm text-slate-300">Athlete</div>
@@ -618,7 +582,7 @@ function App() {
 
             <div className="rounded-2xl bg-slate-900/40 ring-1 ring-white/10 p-4 text-xs text-slate-400">
               Progress is saved locally in your browser (LocalStorage). Opening this
-              dashboard on another device won’t sync automatically.
+              dashboard on another device won't sync automatically.
             </div>
           </div>
         </div>
@@ -633,4 +597,3 @@ if (ReactDOM.createRoot) {
 } else {
   ReactDOM.render(<App />, rootEl);
 }
-

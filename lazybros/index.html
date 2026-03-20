@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛋️ Lazy Bros Tracker - Eindhoven Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+        
+        .location {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .bro-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+        }
+        
+        .bro-card.bro2::before {
+            background: linear-gradient(90deg, #4ecca3, #4fc3f7);
+        }
+        
+        .bro-avatar {
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .bro-name {
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #aaa;
+        }
+        
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        
+        .laziness-meter {
+            margin: 20px 0;
+        }
+        
+        .laziness-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .laziness-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .laziness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            border-radius: 15px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            font-weight: bold;
+        }
+        
+        .bro2 .laziness-fill {
+            background: linear-gradient(90deg, #4ecca3, #4fc3f7);
+        }
+        
+        .chart-container {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        #timelineChart {
+            width: 100%;
+            height: 300px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛋️ Lazy Bros Tracker</h1>
+        <p>Monitoring lounge activity in <span class="location">📍 Eindhoven</span></p>
+        <p>Since Friday 12:00 PM CET</p>
+    </div>
+    
+    <div class="dashboard">
+        <div class="bro-card">
+            <div class="bro-avatar">🛋️</div>
+            <div class="bro-name">Bro #1</div>
+            
+            <div class="laziness-meter">
+                <div class="laziness-label">
+                    <span>Laziness Level</span>
+                    <span id="laziness1">98%</span>
+                </div>
+                <div class="laziness-bar">
+                    <div class="laziness-fill" id="bar1" style="width: 98%">98%</div>
+                </div>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">😴 Naps Taken</span>
+                <span class="stat-value" id="naps1">--</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">📺 Screen Time</span>
+                <span class="stat-value" id="screen1">--h</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">🚶 Steps Today</span>
+                <span class="stat-value" id="steps1">--</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">🍕 Snacks Consumed</span>
+                <span class="stat-value" id="snacks1">--</span>
+            </div>
+        </div>
+        
+        <div class="bro-card bro2">
+            <div class="bro-avatar">🎮</div>
+            <div class="bro-name">Bro #2</div>
+            
+            <div class="laziness-meter">
+                <div class="laziness-label">
+                    <span>Laziness Level</span>
+                    <span id="laziness2">95%</span>
+                </div>
+                <div class="laziness-bar">
+                    <div class="laziness-fill" id="bar2" style="width: 95%">95%</div>
+                </div>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">😴 Naps Taken</span>
+                <span class="stat-value" id="naps2">--</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">📺 Screen Time</span>
+                <span class="stat-value" id="screen2">--h</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">🚶 Steps Today</span>
+                <span class="stat-value" id="steps2">--</span>
+            </div>
+            
+            <div class="stat">
+                <span class="stat-label">🍕 Snacks Consumed</span>
+                <span class="stat-value" id="snacks2">--</span>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">📈 Hours of Laziness Timeline</div>
+            <canvas id="timelineChart"></canvas>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e94560;"></div>
+                    <span>Bro #1</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4ecca3;"></div>
+                    <span>Bro #2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>"The only running they do is on empty promises" 🏃‍♂️💨</p>
+        <p id="last-updated">Last updated: --</p>
+    </div>
+    
+    <script>
+        // Find the most recent Friday at 12:00 PM
+        function getStartTime() {
+            const now = new Date();
+            const start = new Date(now);
+            start.setHours(12, 0, 0, 0);
+            
+            // Go back to most recent Friday
+            while (start.getDay() !== 5) {
+                start.setDate(start.getDate() - 1);
+            }
+            
+            return start;
+        }
+        
+        const startTime = getStartTime();
+        
+        function updateStats() {
+            const now = new Date();
+            const hoursPassed = Math.floor((now - startTime) / (1000 * 60 * 60));
+            const daysPassed = Math.floor(hoursPassed / 24);
+            
+            // Simulated stats based on time passed
+            const napsPerDay = [2, 3, 1, 2, 3, 4, 2];
+            const snacksPerHour = [0.8, 1.2, 0.5, 1.0, 0.9, 1.5, 0.7];
+            
+            // Bro 1 stats
+            document.getElementById('naps1').textContent = Math.floor(daysPassed * 2.5 + (hoursPassed % 24 > 14 ? 2 : 1));
+            document.getElementById('screen1').textContent = Math.floor(hoursPassed * 0.7) + 'h';
+            document.getElementById('steps1').textContent = Math.floor(hoursPassed * 45);
+            document.getElementById('snacks1').textContent = Math.floor(hoursPassed * 0.9);
+            
+            // Bro 2 stats
+            document.getElementById('naps2').textContent = Math.floor(daysPassed * 2.2 + (hoursPassed % 24 > 16 ? 1 : 0));
+            document.getElementById('screen2').textContent = Math.floor(hoursPassed * 0.8) + 'h';
+            document.getElementById('steps2').textContent = Math.floor(hoursPassed * 35);
+            document.getElementById('snacks2').textContent = Math.floor(hoursPassed * 1.1);
+            
+            // Calculate laziness (sinusoidal + random fluctuation)
+            const laziness1 = Math.min(100, 85 + Math.sin(Date.now() / 100000) * 10 + Math.random() * 5);
+            const laziness2 = Math.min(100, 82 + Math.cos(Date.now() / 100000) * 12 + Math.random() * 5);
+            
+            document.getElementById('laziness1').textContent = laziness1.toFixed(1) + '%';
+            document.getElementById('bar1').style.width = laziness1 + '%';
+            document.getElementById('bar1').textContent = laziness1.toFixed(1) + '%';
+            
+            document.getElementById('laziness2').textContent = laziness2.toFixed(1) + '%';
+            document.getElementById('bar2').style.width = laziness2 + '%';
+            document.getElementById('bar2').textContent = laziness2.toFixed(1) + '%';
+            
+            document.getElementById('last-updated').textContent = 'Last updated: ' + now.toLocaleString();
+        }
+        
+        // Chart drawing
+        function drawChart() {
+            const canvas = document.getElementById('timelineChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 60;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.fillRect(padding, padding, width - padding * 2, height - padding * 2);
+            
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (height - padding * 2) * i / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Calculate hours
+            const now = new Date();
+            const totalHours = Math.ceil((now - startTime) / (1000 * 60 * 60));
+            const maxHours = Math.max(48, totalHours + 6);
+            
+            const chartData = [];
+            for (let h = 0; h <= totalHours; h += 2) {
+                const hourTime = new Date(startTime.getTime() + h * 3600000);
+                const bro1Value = 60 + Math.sin(h / 8) * 20 + Math.random() * 15;
+                const bro2Value = 55 + Math.cos(h / 10) * 25 + Math.random() * 12;
+                chartData.push({
+                    hour: h,
+                    time: hourTime,
+                    bro1: Math.min(100, bro1Value),
+                    bro2: Math.min(100, bro2Value)
+                });
+            }
+            
+            // Draw Bro 1 line
+            ctx.beginPath();
+            ctx.strokeStyle = '#e94560';
+            ctx.lineWidth = 3;
+            chartData.forEach((point, i) => {
+                const x = padding + (point.hour / maxHours) * (width - padding * 2);
+                const y = height - padding - (point.bro1 / 100) * (height - padding * 2);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // Draw Bro 2 line
+            ctx.beginPath();
+            ctx.strokeStyle = '#4ecca3';
+            ctx.lineWidth = 3;
+            chartData.forEach((point, i) => {
+                const x = padding + (point.hour / maxHours) * (width - padding * 2);
+                const y = height - padding - (point.bro2 / 100) * (height - padding * 2);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // Draw points for Bro 1
+            ctx.fillStyle = '#e94560';
+            chartData.forEach(point => {
+                const x = padding + (point.hour / maxHours) * (width - padding * 2);
+                const y = height - padding - (point.bro1 / 100) * (height - padding * 2);
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw points for Bro 2
+            ctx.fillStyle = '#4ecca3';
+            chartData.forEach(point => {
+                const x = padding + (point.hour / maxHours) * (width - padding * 2);
+                const y = height - padding - (point.bro2 / 100) * (height - padding * 2);
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // X-axis labels
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            
+            const labelInterval = Math.ceil(maxHours / 8);
+            for (let h = 0; h <= maxHours; h += labelInterval) {
+                const x = padding + (h / maxHours) * (width - padding * 2);
+                const labelTime = new Date(startTime.getTime() + h * 3600000);
+                const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][labelTime.getDay()];
+                const hour = labelTime.getHours();
+                ctx.fillText(`${day} ${hour}:00`, x, height - 20);
+            }
+            
+            // Y-axis labels
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#aaa';
+            for (let i = 0; i <= 5; i++) {
+                const value = i * 20;
+                const y = height - padding - (i / 5) * (height - padding * 2);
+                ctx.fillText(value + '%', padding - 10, y + 4);
+            }
+        }
+        
+        // Initialize
+        updateStats();
+        drawChart();
+        setInterval(updateStats, 30000);
+        
+        window.addEventListener('resize', drawChart);
+    </script>
+</body>
+</html>

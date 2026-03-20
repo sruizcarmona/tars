@@ -330,16 +330,16 @@
             const snacksPerHour = [0.8, 1.2, 0.5, 1.0, 0.9, 1.5, 0.7];
             
             // Bro 1 stats
-            document.getElementById('naps1').textContent = Math.floor(daysPassed * 2.5 + (hoursPassed % 24 > 14 ? 2 : 1));
-            document.getElementById('screen1').textContent = Math.floor(hoursPassed * 0.7) + 'h';
-            document.getElementById('steps1').textContent = Math.floor(hoursPassed * 45);
-            document.getElementById('snacks1').textContent = Math.floor(hoursPassed * 0.9);
+            document.getElementById('naps1').textContent = 0;
+            document.getElementById('screen1').textContent = 1 + 'h';
+            document.getElementById('steps1').textContent = 13058;
+            document.getElementById('snacks1').textContent = 2;
             
             // Bro 2 stats
-            document.getElementById('naps2').textContent = Math.floor(daysPassed * 2.2 + (hoursPassed % 24 > 16 ? 1 : 0));
-            document.getElementById('screen2').textContent = Math.floor(hoursPassed * 0.8) + 'h';
-            document.getElementById('steps2').textContent = Math.floor(hoursPassed * 35);
-            document.getElementById('snacks2').textContent = Math.floor(hoursPassed * 1.1);
+            document.getElementById('naps2').textContent = 0;
+            document.getElementById('screen2').textContent = 1 + 'h';
+            document.getElementById('steps2').textContent = 11774;
+            document.getElementById('snacks2').textContent = 2;
             
             // Calculate laziness (sinusoidal + random fluctuation)
             const laziness1 = Math.min(100, 85 + Math.sin(Date.now() / 100000) * 10 + Math.random() * 5);

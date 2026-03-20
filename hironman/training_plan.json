@@ -59,7 +59,7 @@
         {"type": "Swim", "title": "CSS Endurance", "description": "5x200m @ 1:32 (20s rest) + 400m Mixed drills", "completed": false},
         {"type": "Gym", "title": "Heavy Strength", "description": "Repeat Week 1 + Core Plank Circuit", "completed": true},
         {"type": "Brick", "title": "Gym Brick Session", "description": "45m stationary bike @ 30km/h moderate resistance (7/10 effort) + 5km treadmill run @ 4:30/km pace. Minimal transition time between disciplines.", "completed": false},
-        {"type": "Run", "title": "Hill Repeats", "description": "45m run including 8x30s sprints uphill", "completed": false}
+        {"type": "Run", "title": "Hill Repeats", "description": "45m run including 8x30s sprints uphill", "completed": true}
       ]
     },
     {

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIRONFOOD - Peñíscola Half Ironman Nutrition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        header h1 {
+            color: #4a9eff;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header h2 {
+            color: #8b949e;
+            font-weight: normal;
+            font-size: 1.1rem;
+        }
+        
+        .race-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .race-info span {
+            color: #7ee787;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        nav button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        nav button:hover {
+            background: #30363d;
+        }
+        
+        nav button.active {
+            background: #4a9eff;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #161b22;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+        
+        .stat-card .unit {
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+        
+        .profile-container {
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-container h3 {
+            color: #c9d1d9;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .profile-container svg {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-bar { 
+            width: 16px; 
+            height: 16px; 
+            background: #4CAF50; 
+            border-radius: 2px;
+        }
+        
+        .legend-gel { 
+            width: 12px; 
+            height: 12px; 
+            background: #FF5722; 
+            border-radius: 50%;
+        }
+        
+        .nutrition-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .nutrition-table th,
+        .nutrition-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .nutrition-table th {
+            background: #21262d;
+            color: #4a9eff;
+            font-weight: 600;
+        }
+        
+        .nutrition-table tr:hover {
+            background: #21262d;
+        }
+        
+        .badge-bar {
+            background: #4CAF50;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .badge-gel {
+            background: #FF5722;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .summary-box {
+            background: #1a1a2e;
+            border: 1px solid #4a9eff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .summary-box h3 {
+            color: #4a9eff;
+            margin-bottom: 1rem;
+        }
+        
+        .summary-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .summary-box li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .summary-box li:last-child {
+            border-bottom: none;
+        }
+        
+        .highlight {
+            color: #7ee787;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .race-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏊‍♂️ HIRONFOOD 🏃‍♂️</h1>
+        <h2>Peñíscola Half Ironman Nutrition Strategy</h2>
+        <div class="race-info">
+            <span>📅 April 26, 2026</span>
+            <span>👤 80kg Athlete</span>
+            <span>🎯 30km/h bike + 4:30/km run</span>
+        </div>
+    </header>
+    
+    <nav>
+        <button class="active" onclick="showSection('overview')">Overview</button>
+        <button onclick="showSection('bike')">Bike</button>
+        <button onclick="showSection('run')">Run</button>
+    </nav>
+    
+    <div class="container">
+        <!-- Overview Section -->
+        <div id="overview" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Distance</h3>
+                    <div class="value">113.5</div>
+                    <div class="unit">km</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Est. Time</h3>
+                    <div class="value">~5h</div>
+                    <div class="unit">(swim+bike+run)</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Carbs</h3>
+                    <div class="value">510</div>
+                    <div class="unit">grams</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Climbing</h3>
+                    <div class="value">1,235</div>
+                    <div class="unit">m total</div>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <h3>📋 Race Day Strategy</h3>
+                <ul>
+                    <li><strong>Pre-race (2-3 hrs):</strong> <span class="highlight">150g carbs</span> — porridge, banana, bagel</li>
+                    <li><strong>Swim (2km):</strong> Gel 15min before start → ~25g carbs</li>
+                    <li><strong>Bike (89.5km):</strong> <span class="highlight">261g carbs</span> — 3 bars + 6 gels + water</li>
+                    <li><strong>Run (20.8km):</strong> <span class="highlight">75g carbs</span> — 3 gels + aid stations</li>
+                    <li><strong>Rate:</strong> ~90-100g/hr for 80kg athlete</li>
+                </ul>
+            </div>
+            
+            <div class="summary-box">
+                <h3>⚡ Key Rules</h3>
+                <ul>
+                    <li>🍫 <strong>Eat bars EARLY</strong> — first one at km 8 while still fresh</li>
+                    <li>💧 <strong>Sip water every 10-15 min</strong> — 2-3 bottles minimum on bike</li>
+                    <li>🔥 <strong>Never chase pace on climbs</strong> — hold power, let speed fall</li>
+                    <li>⏱️ <strong>Practice T2 eating</strong> — train your gut on brick sessions</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Bike Section -->
+        <div id="bike" class="section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Distance</h3>
+                    <div class="value">89.5</div>
+                    <div class="unit">km</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Climbing</h3>
+                    <div class="value">1,003</div>
+                    <div class="unit">m</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Est. Time</h3>
+                    <div class="value">~3h</div>
+                    <div class="unit">at 30km/h</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Bike Carbs</h3>
+                    <div class="value">261</div>
+                    <div class="unit">grams</div>
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <h3>📈 Elevation Profile with Nutrition Markers</h3>
+                <img src="bike_profile.svg" alt="Bike course elevation profile" style="width:100%; border-radius:8px; background:#1a1a2e;">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-bar"></div>
+                        <span>Clif Bar (37g carbs)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-gel"></div>
+                        <span>Gel (25g carbs)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="nutrition-table">
+                <thead>
+                    <tr>
+                        <th>Distance</th>
+                        <th>Type</th>
+                        <th>Notes</th>
+                        <th>Carbs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>km 2</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Start fuel — easy terrain, get sugar in early</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 8</td>
+                        <td><span class="badge-bar">BAR</span></td>
+                        <td>⭐ Bar #1 — BEFORE hard climbing starts</td>
+                        <td>37g</td>
+                    </tr>
+                    <tr>
+                        <td>km 18</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Top of climb — recover while descending</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 30</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Mid course — steady effort</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 40</td>
+                        <td><span class="badge-bar">BAR</span></td>
+                        <td>⭐ Bar #2 — flat section, last chance for solids</td>
+                        <td>37g</td>
+                    </tr>
+                    <tr>
+                        <td>km 52</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Late course — gels only from here</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 65</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Getting tired — easy to digest</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 80</td>
+                        <td><span class="badge-bar">BAR</span></td>
+                        <td>Bar #3 — if stomach tolerates, else use 2 gels</td>
+                        <td>37g</td>
+                    </tr>
+                    <tr>
+                        <td>km 85</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Last fuel before T2</td>
+                        <td>25g</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="summary-box">
+                <h3>🚴 Bike Terrain Breakdown</h3>
+                <ul>
+                    <li><strong>0-20km:</strong> Big climb to 200m — hardest section, save energy</li>
+                    <li><strong>20-45km:</strong> Rolling hills, some recovery after the work</li>
+                    <li><strong>45-75km:</strong> Out-and-back, mixed terrain</li>
+                    <li><strong>75-90km:</strong> Mostly downhill finish to T2</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Run Section -->
+        <div id="run" class="section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Distance</h3>
+                    <div class="value">20.8</div>
+                    <div class="unit">km</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Climbing</h3>
+                    <div class="value">232</div>
+                    <div class="unit">m</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Est. Time</h3>
+                    <div class="value">~1h35</div>
+                    <div class="unit">at 4:30/km</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Run Carbs</h3>
+                    <div class="value">75</div>
+                    <div class="unit">grams</div>
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <h3>📈 Elevation Profile with Nutrition Markers</h3>
+                <img src="run_profile.svg" alt="Run course elevation profile" style="width:100%; border-radius:8px; background:#1a1a2e;">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-bar"></div>
+                        <span>Clif Bar (37g from T2)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-gel"></div>
+                        <span>Gel (25g each)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="nutrition-table">
+                <thead>
+                    <tr>
+                        <th>Distance</th>
+                        <th>Type</th>
+                        <th>Notes</th>
+                        <th>Carbs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>T2</td>
+                        <td><span class="badge-bar">BAR</span></td>
+                        <td>Eat while transitioning — gives 20min to settle</td>
+                        <td>37g</td>
+                    </tr>
+                    <tr>
+                        <td>km 5</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Settled into pace — first gel</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 10</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Mid course — steady effort</td>
+                        <td>25g</td>
+                    </tr>
+                    <tr>
+                        <td>km 15</td>
+                        <td><span class="badge-gel">GEL</span></td>
+                        <td>Final fuel — last 10km on stored energy</td>
+                        <td>25g</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="summary-box">
+                <h3>🏃 Run Strategy</h3>
+                <ul>
+                    <li><strong>km 0-2:</strong> Conservative start — shakeout from bike, skip first aid station</li>
+                    <li><strong>km 2-5:</strong> Settle into 4:30 pace, take gel at km 5</li>
+                    <li><strong>km 5-15:</strong> Steady effort on rolling coastal terrain</li>
+                    <li><strong>km 15-21:</strong> Empty the tank — no more fuel needed</li>
+                </ul>
+            </div>
+            
+            <div class="summary-box">
+                <h3>💧 Aid Stations</h3>
+                <ul>
+                    <li>Every 2-3km on course</li>
+                    <li>Sip water at each — don't skip!</li>
+                    <li>Take gels WITH water, never dry</li>
+                    <li>Aid station at km 18 is too late to help — skip it</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Set active button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

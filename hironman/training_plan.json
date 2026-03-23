@@ -58,7 +58,6 @@
       "sessions": [
         {"type": "Swim", "title": "CSS Endurance", "description": "5x200m @ 1:32 (20s rest) + 400m Mixed drills", "completed": true},
         {"type": "Gym", "title": "Heavy Strength", "description": "Repeat Week 1 + Core Plank Circuit", "completed": true},
-        {"type": "Brick", "title": "Gym Brick Session", "description": "45m stationary bike @ 30km/h moderate resistance (7/10 effort) + 5km treadmill run @ 4:30/km pace. Minimal transition time between disciplines.", "completed": false},
         {"type": "Run", "title": "Hill Repeats", "description": "45m run including 8x30s sprints uphill", "completed": true}
       ]
     },
@@ -67,10 +66,10 @@
       "name": "Easter 1",
       "start_date": "2026-03-23",
       "sessions": [
-        {"type": "Bike", "title": "Course Recon", "description": "60km Course ride. Memorize gear changes on steep climbs.", "completed": false},
+        {"type": "Brick", "title": "Course Recon Brick", "description": "60km Course ride. Memorize gear changes on steep climbs. + 10km Run @ 4:30 pace.", "completed": false},
         {"type": "Run", "title": "Aerobic Base", "description": "15km Steady @ 4:50-5:00 pace.", "completed": false},
-        {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls).", "completed": false},
-        {"type": "Brick", "title": "Short Brick", "description": "40km Bike + 5km Run @ 4:30 pace.", "completed": false}
+        {"type": "Brick", "title": "Tri Simulation", "description": "1km swim (CSS pace) + 45m stationary bike @ 30km/h moderate resistance (7/10) + 5km treadmill run @ 4:30/km. Full transition practice between all three.", "completed": false},
+        {"type": "Gym", "title": "Heavy Strength", "description": "4x8 Heavy Goblet Squats, Deadlifts, Bulgarian Split Squats", "completed": true}
       ]
     },
     {

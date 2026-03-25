@@ -67,7 +67,7 @@
       "start_date": "2026-03-23",
       "sessions": [
         {"type": "Brick", "title": "Course Recon Brick", "description": "60km Course ride. Memorize gear changes on steep climbs. + 10km Run @ 4:30 pace.", "completed": false},
-        {"type": "Run", "title": "Aerobic Base", "description": "15km Steady @ 4:50-5:00 pace.", "completed": false},
+        {"type": "Run", "title": "Aerobic Base", "description": "14km @ 4:40/km pace (completed)", "completed": true},
         {"type": "Brick", "title": "Tri Simulation", "description": "1km swim (CSS pace) + 45m stationary bike @ 30km/h moderate resistance (7/10) + 5km treadmill run @ 4:30/km. Full transition practice between all three.", "completed": false},
         {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls).", "completed": false},
         {"type": "Gym", "title": "Heavy Strength", "description": "4x8 Heavy Goblet Squats, Deadlifts, Bulgarian Split Squats", "completed": true}

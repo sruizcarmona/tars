@@ -77,10 +77,10 @@
       "name": "Easter 2",
       "start_date": "2026-03-30",
       "sessions": [
+        {"type": "Run", "title": "Aerobic Endurance", "description": "12-14km @ 4:40-4:50/km pace.", "completed": false},
+        {"type": "Run", "title": "Intervals - Option B", "description": "6x1km @ 4:20/km (90s jog rest).", "completed": false},
         {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls).", "completed": false},
         {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition.", "completed": false},
-        {"type": "Brick", "title": "Big Brick Dress Rehearsal", "description": "70km Course Bike + 8km Run @ 4:30 pace.", "completed": false},
-        {"type": "Swim", "title": "CSS Peak", "description": "10x100m @ 1:25 (Aggressive pace) + 200m easy.", "completed": false},
         {"type": "Gym", "title": "Mobility", "description": "Foam roll and core. No heavy weights.", "completed": false}
       ]
     },

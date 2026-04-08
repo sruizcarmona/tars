@@ -78,7 +78,7 @@
       "start_date": "2026-03-30",
       "sessions": [
         {"type": "Run", "title": "Aerobic Endurance", "description": "12-14km @ 4:40-4:50/km pace. (Completed: 12km @ 4:44/km)", "completed": true},
-        {"type": "Run", "title": "Intervals - Option B", "description": "6x1km @ 4:20/km (90s jog rest).", "completed": false},
+        {"type": "Run", "title": "Intervals - Option B", "description": "6x1km @ 4:20/km (90s jog rest).", "completed": true},
         {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls). (Completed: 2km @ ~1:30/100m, wetsuit test)", "completed": true},
         {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition. (Completed: 29km/h avg, 70g/hr carbs, 2L fluid, finished strong)", "completed": true},
         {"type": "Gym", "title": "Mobility", "description": "Foam roll and core. No heavy weights.", "completed": true}
@@ -90,7 +90,7 @@
       "sessions": [
         {"type": "Run", "title": "Intervals", "description": "8x800m @ 3:55/km (90s rest).", "completed": false},
         {"type": "Swim", "title": "Strength", "description": "4x400m Pull Buoy/Paddles (Slow & Strong).", "completed": false},
-        {"type": "Gym", "title": "Explosive", "description": "Box jumps and Squat jumps (Low volume).", "completed": false},
+        {"type": "Gym", "title": "Explosive", "description": "Box jumps and Squat jumps (Low volume).", "completed": true},
         {"type": "Bike", "title": "Stationary Sweet Spot", "description": "45m (2x15m Hard effort).", "completed": false}
       ]
     },

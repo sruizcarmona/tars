@@ -79,9 +79,9 @@
       "sessions": [
         {"type": "Run", "title": "Aerobic Endurance", "description": "12-14km @ 4:40-4:50/km pace. (Completed: 12km @ 4:44/km)", "completed": true},
         {"type": "Run", "title": "Intervals - Option B", "description": "6x1km @ 4:20/km (90s jog rest).", "completed": false},
-        {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls).", "completed": false},
-        {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition.", "completed": false},
-        {"type": "Gym", "title": "Mobility", "description": "Foam roll and core. No heavy weights.", "completed": false}
+        {"type": "Swim", "title": "Open Water Simulation", "description": "1,500m Straight swim in pool (no head-touching walls). (Completed: 2km @ ~1:30/100m, wetsuit test)", "completed": true},
+        {"type": "Bike", "title": "Full Distance Test", "description": "90km Course ride. Target 75g carb/hour nutrition. (Completed: 29km/h avg, 70g/hr carbs, 2L fluid, finished strong)", "completed": true},
+        {"type": "Gym", "title": "Mobility", "description": "Foam roll and core. No heavy weights.", "completed": true}
       ]
     },
     {

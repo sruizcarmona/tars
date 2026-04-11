@@ -88,7 +88,7 @@
       "week": 5,
       "start_date": "2026-04-06",
       "sessions": [
-        {"type": "Run", "title": "Intervals", "description": "8x800m @ 3:55/km (90s rest).", "completed": false},
+        {"type": "Run", "title": "Intervals", "description": "8x800m @ 3:55/km (90s rest).", "completed": true},
         {"type": "Swim", "title": "Strength", "description": "4x400m Pull Buoy/Paddles (Slow & Strong).", "completed": true},
         {"type": "Gym", "title": "Explosive", "description": "Box jumps and Squat jumps (Low volume).", "completed": true},
         {"type": "Bike", "title": "40km Outdoor Ride", "description": "40km @ 29.5km/h avg. Carbon paste tested - bike fit adjusted.", "completed": true}

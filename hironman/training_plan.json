@@ -98,9 +98,9 @@
       "week": 6,
       "start_date": "2026-04-13",
       "sessions": [
-        {"type": "Run", "title": "Race Pace", "description": "10km @ 4:30/km.", "completed": false},
-        {"type": "Swim", "title": "Taper Starts", "description": "1,000m Easy mixed.", "completed": false},
-        {"type": "Bike", "title": "Spinning", "description": "45m high cadence (90+ RPM).", "completed": false}
+        {"type": "Run", "title": "Race Pace", "description": "10km @ 4:30/km.", "completed": true},
+        {"type": "Swim", "title": "Taper Starts", "description": "1,000m Easy mixed.", "completed": true},
+        {"type": "Bike", "title": "Spinning", "description": "45m high cadence (90+ RPM).", "completed": true}
       ]
     },
     {

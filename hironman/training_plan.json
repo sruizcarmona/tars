@@ -108,7 +108,8 @@
       "name": "Race Week",
       "start_date": "2026-04-20",
       "sessions": [
-        {"type": "Swim", "title": "Feel the Water", "description": "20 min easy + 4x50m sprints.", "completed": false},
+        {"type": "Run", "title": "Taper Intervals", "description": "30min with 600m @ 4:40/km and 400m @ 4:00/km intervals. Completed 2026-04-21.", "completed": true},
+        {"type": "Swim", "title": "Feel the Water", "description": "20 min easy + 4x50m sprints.", "completed": false, "scheduled": "2026-04-22"},
         {"type": "Run", "title": "Leg Opener", "description": "15 min easy + 4 strides.", "completed": false},
         {"type": "Race", "title": "Peñiscola Half Ironman", "description": "Target: 1:35 Half Marathon (4:30 pace).", "completed": false}
       ],

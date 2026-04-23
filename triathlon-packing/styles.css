@@ -1,0 +1,133 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+h1 { 
+    margin: 0; 
+    color: #1a73e8;
+    font-size: 1.8rem;
+}
+
+.subtitle { 
+    color: #666; 
+    margin: 5px 0 15px; 
+}
+
+.progress-container {
+    width: 100%;
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #28a745, #34d058);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+#progress-text {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 10px 0 0;
+    color: #444;
+}
+
+.category { margin-bottom: 25px; }
+
+.category h2 {
+    font-size: 1rem;
+    color: #1a73e8;
+    border-left: 4px solid #1a73e8;
+    padding-left: 12px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafafa;
+    margin-bottom: 8px;
+}
+
+.item:hover { background: #f0f0f0; }
+.item.checked { 
+    background: #e8f5e9; 
+    color: #888; 
+}
+.item.checked label { text-decoration: line-through; }
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.item label {
+    cursor: pointer;
+    font-size: 1rem;
+    flex: 1;
+}
+
+footer {
+    margin-top: 30px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+}
+
+button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+button:hover { background: #c82333; }
+
+a { 
+    color: #1a73e8; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+
+a:hover { text-decoration: underline; }

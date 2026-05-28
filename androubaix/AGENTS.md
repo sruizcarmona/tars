@@ -2,7 +2,6 @@
 
 **Project:** Mapping cobblestone/sett street surfaces in Sant Andreu (Barcelona)
 **Status:** Active
-**Commander:** Max
 **Operator:** Tars 🤖
 **Codename:** Androubaix (Paris-Roubaix vibes, Sant Andreu edition)
 
@@ -50,6 +49,5 @@ Live map at: `https://sruizcarmona.github.io/tars/androubaix/`
 
 ## Communication
 
-- Max is on Telegram (@seryiorc)
 - All code lives in `~/github/tars-openclaw/androubaix/`
 - Tars operates from OpenClaw workspace

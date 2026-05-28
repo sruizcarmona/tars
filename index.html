@@ -3,27 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peñíscola Half Ironman Packing List</title>
+    <title>Max's Projects | Tars Control Center</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: #eee; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        h1 { color: #fff; margin-bottom: 10px; }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .project-card { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 20px; transition: transform 0.2s, border-color 0.2s; text-decoration: none; color: inherit; display: block; }
+        .project-card:hover { transform: translateY(-5px); border-color: #00ffcc; background: #333; }
+        .project-card h3 { margin: 0 0 10px 0; color: #00ffcc; }
+        .project-card p { font-size: 0.9rem; color: #bbb; line-height: 1.4; }
+        .tag { display: inline-block; font-size: 0.7rem; background: #444; padding: 2px 8px; border-radius: 4px; margin-top: 10px; color: #aaa; }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🏊‍♂️ Peñíscola Half Ironman</h1>
-            <p class="subtitle">April 26, 2026</p>
-            <div class="progress-container">
-                <div id="progress-bar" class="progress-bar"></div>
-            </div>
-            <p id="progress-text">0% Complete</p>
+            <h1>🚀 Project Dashboard</h1>
+            <p>Managed by Tars 🤖</p>
         </header>
 
-        <main id="packing-list"></main>
-
-        <footer>
-            <button id="reset-btn">Reset List</button>
-            <p>Nutrition: <a href="https://sruizcarmona.github.io/tars/hironfood/" target="_blank">HIRONFOOD</a></p>
-        </footer>
+        <div class="project-grid">
+            <a href="https://sruizcarmona.github.io/tars/androubaix/" class="project-card">
+                <h3>Androubaix</h3>
+                <p>Operation Pavé: Mapping cobblestone and sett surfaces in Sant Andreu.</p>
+                <span class="tag">Active</span>
+            </a>
+            <a href="https://sruizcarmona.github.io/tars/hironman/" class="project-card">
+                <h3>Hironman</h3>
+                <p>Training dashboard and race planning for half-ironman events.</p>
+                <span class="tag">Core</span>
+            </a>
+            <a href="https://sruizcarmona.github.io/tars/hironfood/" class="project-card">
+                <h3>Hironfood</h3>
+                <p>Nutrition visualization and course-specific fuel markers.</p>
+                <span class="tag">Nutrition</span>
+            </a>
+            <a href="https://sruizcarmona.github.io/tars/triathlon-packing/" class="project-card">
+                <h3>Packing List</h3>
+                <p>Gear management for race day in Peñíscola.</p>
+                <span class="tag">Utility</span>
+            </a>
+            <a href="https://sruizcarmona.github.io/tars/lazybros/" class="project-card">
+                <h3>Lazybros</h3>
+                <p>Project repository for the Lazybros ecosystem.</p>
+                <span class="tag">Development</span>
+            </a>
+        </div>
     </div>
-    <script src="app.js"></script>
 </body>
 </html>

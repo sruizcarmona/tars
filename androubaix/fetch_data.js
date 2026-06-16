@@ -6,7 +6,11 @@ const axios = require('axios');
  * and prepares them for a Leaflet.js visualization.
  */
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_URL = 'https://maps.mail.ru/osm/tools/overpass/api/interpreter';
+const OVERPASS_FALLBACKS = [
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass-api.de/api/interpreter'
+];
 const TARGET_SQUARE = {
     lat: 41.4305,
     lon: 2.1920,
@@ -18,24 +22,46 @@ const TARGET_STREETS = [
     "Carrer de Vintró",
     "Carrer de Pons i Gallarza",
     "Carrer del Mercat",
-    "Carrer de Sant Adrià"
+    "Carrer de Sant Adrià",
+    "Carrer del Doctor Santponç",
+    "Carrer de Llenguadoc",
+    "Carrer de Coroleu"
 ];
 
 async function fetchStreetData() {
     // Query for all ways that match our targeting criteria
     // Only focusing on the Sant Andreu sector (south of Meridiana)
+    // Bbox: ~41.420,2.170 to 41.450,2.210 (Sant Andreu S of Meridiana)
+    const BBOX = '41.420,2.170,41.450,2.210';
     const query = `
         [out:json][timeout:25];
         (
-          way[name~"${TARGET_STREETS.join('|')}"][surface~"sett|cobblestone|paving_stones"];
-          way[name~"${TARGET_STREETS.join('|')}"];
+          way(${BBOX})[name~"${TARGET_STREETS.join('|')}"][surface~"sett|cobblestone|paving_stones"];
+          way(${BBOX})[name~"${TARGET_STREETS.join('|')}"];
         );
         out geom;
     `;
 
     try {
         console.log("Executing Operation Pavé reconnaissance query...");
-        const response = await axios.post(OVERPASS_URL, `data=${encodeURIComponent(query)}`);
+        const post = (url) => axios.post(url, new URLSearchParams({ data: query }).toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'TarsAndroubaix/1.0 (cobot recon)'
+            },
+            timeout: 60000
+        });
+        let response;
+        try {
+            response = await post(OVERPASS_URL);
+        } catch (e) {
+            console.warn(`Primary ${OVERPASS_URL} failed (${e.response?.status || e.message}), trying fallbacks...`);
+            for (const fb of OVERPASS_FALLBACKS) {
+                try { response = await post(fb); console.log(`Fallback ${fb} OK`); break; }
+                catch (e2) { console.warn(`Fallback ${fb} failed: ${e2.response?.status || e2.message}`); }
+            }
+            if (!response) throw new Error('All Overpass instances failed');
+        }
         
         const processed = response.data.elements.map(way => {
             // Calculate length of the segment

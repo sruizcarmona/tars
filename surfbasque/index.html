@@ -462,7 +462,7 @@
         $('#timeWindow').textContent = isGo ? `Best: ${fmtHour(h.time)}` : '—'
         $('#timeWindow').className = 'mt-4 text-base font-medium fade-in-delayed'
         const wh = h.wh != null ? `${h.wh.toFixed(1)}m` : '--'
-        const wp = h.wp != null ? `${h.wp}s` : '--'
+        const wp = h.wp != null ? `${Math.round(h.wp)}s` : '--'
         const ws = h.ws != null ? `${Math.round(h.ws)}km/h` : '--'
         const scorePct = Math.min(100, result.maxScore)
         const bars = '■'.repeat(Math.ceil(scorePct / 10)) + '□'.repeat(10 - Math.ceil(scorePct / 10))

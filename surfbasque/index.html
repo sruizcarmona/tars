@@ -8,54 +8,254 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-        },
-      },
-    }
-  </script>
   <style>
-    body { transition: background-color 0.6s ease, color 0.6s ease; }
-    #verdict { transition: transform 0.3s ease; }
+    :root {
+      --go-bg: #ecfdf5;
+      --go-text: #059669;
+      --go-strong: #10b981;
+      --not-bg: #fef2f2;
+      --not-text: #f87171;
+      --not-strong: #ef4444;
+      --wait-bg: #ffffff;
+      --wait-text: #e5e7eb;
+      --muted: #9ca3af;
+      --muted-soft: #d1d5db;
+      --line: #e5e7eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 100vh;
+      max-height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      padding-bottom: 4rem;
+      transition: background-color 0.6s ease, color 0.6s ease;
+    }
+
+    body.state-go { background: var(--go-bg); color: var(--go-text); }
+    body.state-not { background: var(--not-bg); color: var(--not-text); }
+    body.state-wait { background: var(--wait-bg); color: var(--wait-text); }
+    body.state-error { background: #f9fafb; color: #9ca3af; }
+
+    .topbar {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      z-index: 10;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 0.5rem; }
+    .brand {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: none;
+    }
+    @media (min-width: 640px) { .brand { display: inline; } }
+
+    #beach {
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--line);
+      padding: 0.25rem 1.5rem 0.25rem 0;
+      outline: none;
+      cursor: pointer;
+      color: #374151;
+      font-family: inherit;
+    }
+    #beach:focus { border-bottom-color: #9ca3af; }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .icon-btn {
+      font-size: 1.125rem;
+      line-height: 1;
+      padding: 0.25rem 0.5rem;
+      border: 0;
+      border-radius: 0.5rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      font-family: inherit;
+    }
+    .icon-btn:hover { background: rgba(0,0,0,0.05); color: #eab308; }
+    #btnRefresh:hover { color: #6b7280; }
+
+    main {
+      text-align: center;
+      padding: clamp(3rem, 8vh, 5rem) 1.5rem;
+      flex: 1;
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #beachName {
+      margin-bottom: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    body.state-go #beachName { color: var(--go-strong); }
+    body.state-not #beachName { color: var(--not-strong); }
+    body.state-wait #beachName, body.state-error #beachName { color: var(--muted-soft); }
+
+    #verdict {
+      font-size: clamp(3rem, min(20vw, 24vh), 14rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      transition: transform 0.3s ease;
+    }
     #verdict:hover { transform: scale(1.02); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    body.state-go #verdict { color: var(--go-text); }
+    body.state-not #verdict { color: var(--not-text); }
+    body.state-wait #verdict, body.state-error #verdict { color: var(--muted-soft); }
+
+    #timeWindow {
+      margin-top: 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    body.state-go #timeWindow { color: var(--go-strong); }
+    body.state-not #timeWindow { color: var(--not-strong); }
+    body.state-wait #timeWindow, body.state-error #timeWindow { color: var(--muted-soft); }
+
+    #metrics {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    #metrics .dot {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      margin-right: 0.375rem;
+    }
+    body.state-go #metrics .dot { background: var(--go-strong); }
+    body.state-not #metrics .dot { background: #fca5a5; }
+    #metrics .sep { color: var(--muted-soft); }
+    #metrics .score {
+      font-size: 0.625rem;
+      letter-spacing: 0.05em;
+      font-family: ui-monospace, monospace;
+    }
+    body.state-go #metrics .score { color: #34d399; }
+    body.state-not #metrics .score { color: #fca5a5; }
+
+    #updated { margin-top: 2.5rem; font-size: 0.625rem; color: var(--muted-soft); }
+
+    #dayBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      overflow-x: auto;
+      z-index: 20;
+    }
+    #dayBar.hidden { display: none; }
+    .day-cell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.125rem;
+      padding: 0.75rem 0.5rem;
+      min-width: 0;
+    }
+    .day-cell.go { background: var(--go-strong); color: #fff; }
+    .day-cell.not { background: var(--line); color: #6b7280; }
+    .day-cell .d-label { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.2; }
+    .day-cell .d-verdict { font-size: 0.6875rem; font-weight: 900; line-height: 1.2; }
+    .day-cell.go .d-verdict { color: #fff; }
+    .day-cell.not .d-verdict { color: #9ca3af; }
+    .day-cell .d-wh { font-size: 0.5625rem; opacity: 0.6; line-height: 1.2; }
+
     .fade-in { animation: fadeIn 0.5s ease forwards; }
     .fade-in-delayed { animation: fadeIn 0.5s ease 0.3s forwards; opacity: 0; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .fade-in, .fade-in-delayed { opacity: 1 !important; }
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center font-sans bg-white text-gray-900 antialiased select-none">
-  <div class="absolute top-6 left-6 right-6 flex items-center justify-between gap-3 z-10">
-    <div class="flex items-center gap-2">
-      <span class="text-xs font-semibold tracking-widest uppercase text-gray-400 hidden sm:inline">Basque Surf</span>
-      <select id="beach" class="text-sm font-medium bg-transparent border-0 border-b-2 border-gray-200 py-1 pr-6 outline-none cursor-pointer focus:border-gray-400 text-gray-700">
+<body class="state-wait">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="brand">Basque Surf</span>
+      <select id="beach">
         <option value="auto">Auto — Best Beach</option>
       </select>
     </div>
-    <div class="flex items-center gap-3">
-      <button id="btnAuto" title="Find best beach" class="text-lg leading-none px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-yellow-500">&starf;</button>
-      <button id="btnRefresh" title="Refresh" class="text-sm px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400">&olarr;</button>
+    <div class="topbar-right">
+      <button id="btnAuto" title="Best Beach (auto)" class="icon-btn">&starf;</button>
+      <button id="btnRefresh" title="Refresh" class="icon-btn">&olarr;</button>
     </div>
   </div>
 
-  <main class="text-center px-6 py-20">
-    <div class="mb-4 text-xs font-medium tracking-widest uppercase text-gray-400 fade-in" id="beachName">&nbsp;</div>
-    <div id="verdict" class="text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-200">
-      ?
-    </div>
-    <div class="mt-4 text-base font-medium text-gray-300 fade-in-delayed" id="timeWindow">&nbsp;</div>
-    <div class="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400 fade-in-delayed" id="metrics">
-      <span>...</span>
-    </div>
-    <div class="mt-10 text-[10px] text-gray-200" id="updated"></div>
+  <main>
+    <div id="beachName">&nbsp;</div>
+    <div id="verdict">?</div>
+    <div id="timeWindow">&nbsp;</div>
+    <div id="metrics"><span>...</span></div>
+    <div id="updated"></div>
   </main>
 
-  <div id="dayBar" class="fixed bottom-0 left-0 right-0 flex items-stretch justify-center gap-0 overflow-x-auto px-0 py-0 z-20"></div>
+  <div id="dayBar" class="hidden"></div>
 
   <script>
+    const CACHE_KEY = 'bsc:cache:v1'
+    const CACHE_TTL = 30 * 60 * 1000
+    const CACHE_MAX_AGE = 6 * 60 * 60 * 1000
+    const AUTO_REFRESH_MS = 15 * 60 * 1000
+
     const BEACHES = [
       { id: 'zarautz', name: 'Zarautz', lat: 43.284, lon: -2.171, offshoreMin: 140, offshoreMax: 220 },
       { id: 'mundaka', name: 'Mundaka', lat: 43.407, lon: -2.697, offshoreMin: 150, offshoreMax: 230 },
@@ -65,21 +265,27 @@
       { id: 'donostia', name: 'Donostia', lat: 43.318, lon: -1.982, offshoreMin: 150, offshoreMax: 230 },
     ]
 
-    const TRIGGERS = { go: { text: 'GO SURFING', bg: 'bg-emerald-50', textClr: 'text-emerald-600', dot: 'bg-emerald-400' }, not: { text: 'NO', bg: 'bg-red-50', textClr: 'text-red-400', dot: 'bg-red-300' }, wait: { text: '?', bg: 'bg-white', textClr: 'text-gray-200', dot: 'bg-gray-300' } }
+    const TRIGGERS = {
+      go: { text: 'GO SURFING', state: 'state-go' },
+      not: { text: 'NO', state: 'state-not' },
+      wait: { text: '?', state: 'state-wait' },
+    }
 
     const state = { allData: null, results: {}, bestId: null, selectedId: 'auto' }
 
     const $ = s => document.querySelector(s)
     const $$ = s => document.querySelectorAll(s)
 
+    const MADRID = 'Europe/Madrid'
+
     function fmtTime(iso) {
       const d = new Date(iso)
-      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' })
+      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: MADRID })
     }
 
     function fmtHour(iso) {
       const d = new Date(iso)
-      return d.getHours().toString().padStart(2, '0') + ':00'
+      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: MADRID }).slice(0, 2) + ':00'
     }
 
     function scoreWave(waveHeight, wavePeriod, windSpeed, windDir, offshoreMin, offshoreMax) {
@@ -218,59 +424,76 @@
       return result
     }
 
-    function renderVerdict(beach, result) {
+    function buildResults(locations) {
+      const results = {}
+      let bestScore = -1
+      let bestId = BEACHES[0].id
+      locations.forEach((loc, i) => {
+        const beach = BEACHES[i]
+        if (!beach) return
+        const result = analyzeBeach(loc, beach)
+        results[beach.id] = result
+        if (result.maxScore > bestScore) {
+          bestScore = result.maxScore
+          bestId = beach.id
+        }
+      })
+      return { results, bestId }
+    }
+
+    function setState(cls) {
+      document.body.className = cls
+    }
+
+    function renderVerdict(beach, result, note) {
       const isGo = result.maxScore >= 75
       const trigger = isGo ? TRIGGERS.go : TRIGGERS.not
 
-      document.body.className = `min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none pb-16 ${trigger.bg} ${trigger.textClr}`
-      $('#beachName').textContent = beach ? `${beach.name}` : '\u00a0'
-      $('#beachName').className = `mb-4 text-xs font-medium tracking-widest uppercase ${isGo ? 'text-emerald-500' : 'text-red-400'} fade-in`
+      setState(trigger.state)
+      $('#beachName').textContent = beach ? `${beach.name}` : ' '
+      $('#beachName').className = `mb-4 text-xs font-medium tracking-widest uppercase fade-in`
 
       const verdictEl = $('#verdict')
       verdictEl.textContent = trigger.text
-      verdictEl.className = `text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight ${trigger.textClr}`
+      verdictEl.className = 'fade-in'
 
       if (result.bestHour) {
         const h = result.bestHour
-        $('#timeWindow').textContent = isGo ? `Best: ${fmtHour(h.time)}` : '\u2014'
-        $('#timeWindow').className = `mt-4 text-base font-medium fade-in-delayed ${isGo ? 'text-emerald-500' : 'text-red-400'}`
+        $('#timeWindow').textContent = isGo ? `Best: ${fmtHour(h.time)}` : '—'
+        $('#timeWindow').className = 'mt-4 text-base font-medium fade-in-delayed'
         const wh = h.wh != null ? `${h.wh.toFixed(1)}m` : '--'
         const wp = h.wp != null ? `${h.wp}s` : '--'
         const ws = h.ws != null ? `${Math.round(h.ws)}km/h` : '--'
         const scorePct = Math.min(100, result.maxScore)
-        const bars = '\u25A0'.repeat(Math.ceil(scorePct / 10)) + '\u25A1'.repeat(10 - Math.ceil(scorePct / 10))
+        const bars = '■'.repeat(Math.ceil(scorePct / 10)) + '□'.repeat(10 - Math.ceil(scorePct / 10))
         $('#metrics').innerHTML = `
-          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${wh}</span>
-          <span class="text-gray-300">|</span>
-          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${wp}</span>
-          <span class="text-gray-300">|</span>
-          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${ws}</span>
-          <span class="text-gray-300">|</span>
-          <span class="text-[10px] tracking-wider font-mono ${isGo ? 'text-emerald-400' : 'text-red-300'}">${bars} ${result.maxScore}</span>
+          <span><span class="dot"></span>${wh}</span>
+          <span class="sep">|</span>
+          <span><span class="dot"></span>${wp}</span>
+          <span class="sep">|</span>
+          <span><span class="dot"></span>${ws}</span>
+          <span class="sep">|</span>
+          <span class="score">${bars} ${result.maxScore}</span>
         `
       } else {
         $('#timeWindow').textContent = 'No forecast available'
         $('#metrics').innerHTML = '<span>No data for this beach</span>'
       }
 
-      const now = new Date()
-      $('#updated').textContent = `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+      const stamp = note || `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+      $('#updated').textContent = stamp
 
-      // Bottom bar
       const barEl = $('#dayBar')
       if (result.days && result.days.length > 1) {
         let html = ''
         for (const d of result.days) {
           const dayGo = d.maxScore >= 75
-          const dayTrigger = dayGo ? TRIGGERS.go : TRIGGERS.not
-          const bg = dayGo ? 'bg-emerald-500' : 'bg-gray-200'
-          const txt = dayGo ? 'text-white' : 'text-gray-500'
           const wh = d.bestHour && d.bestHour.wh != null ? `${d.bestHour.wh.toFixed(1)}m` : '--'
           html += `
-            <div class="flex-1 flex flex-col items-center justify-center gap-0.5 px-2 py-3 ${bg} ${txt} min-w-0">
-              <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">${d.label}</span>
-              <span class="text-[11px] font-black leading-tight ${dayGo ? 'text-white' : 'text-gray-400'}">${dayGo ? 'GO' : 'NO'}</span>
-              <span class="text-[9px] opacity-60 leading-tight">${wh}</span>
+            <div class="day-cell ${dayGo ? 'go' : 'not'}">
+              <span class="d-label">${d.label}</span>
+              <span class="d-verdict">${dayGo ? 'GO' : 'NO'}</span>
+              <span class="d-wh">${wh}</span>
             </div>
           `
         }
@@ -282,29 +505,28 @@
     }
 
     function renderWaiting() {
-      document.body.className = 'min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none bg-white text-gray-200'
-      $('#beachName').textContent = '\u00a0'
-      $('#beachName').className = 'mb-4 text-xs font-medium tracking-widest uppercase text-gray-200 fade-in'
+      setState('state-wait')
+      $('#beachName').textContent = ' '
       $('#verdict').textContent = '?'
-      $('#verdict').className = 'text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-200'
-      $('#timeWindow').textContent = '\u00a0'
-      $('#metrics').innerHTML = '<span class="text-gray-300 animate-pulse">Loading forecast...</span>'
+      $('#verdict').className = ''
+      $('#timeWindow').textContent = ' '
+      $('#metrics').innerHTML = '<span class="pulse">Loading forecast...</span>'
       $('#updated').textContent = ''
       $('#dayBar').classList.add('hidden')
     }
 
     function renderError(msg) {
-      document.body.className = 'min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none bg-gray-50 text-gray-400'
-      $('#beachName').textContent = '\u00a0'
+      setState('state-error')
+      $('#beachName').textContent = ' '
       $('#verdict').textContent = '?'
-      $('#verdict').className = 'text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-300'
+      $('#verdict').className = ''
       $('#timeWindow').textContent = msg || 'Unable to fetch data'
-      $('#metrics').innerHTML = '<span class="text-xs">Check your connection or try again</span>'
+      $('#metrics').innerHTML = '<span style="font-size:0.75rem">Check your connection or try again</span>'
       $('#updated').textContent = ''
       $('#dayBar').classList.add('hidden')
     }
 
-    function updateView() {
+    function updateView(note) {
       const { results, bestId, selectedId } = state
       if (Object.keys(results).length === 0) { renderWaiting(); return }
 
@@ -312,12 +534,12 @@
       const beach = BEACHES.find(b => b.id === beachId)
       if (!beach || !results[beachId]) { renderWaiting(); return }
 
-      renderVerdict(beach, results[beachId])
+      renderVerdict(beach, results[beachId], note)
     }
 
     function populateSelect() {
       const sel = $('#beach')
-      sel.innerHTML = '<option value="auto">Auto \u2014 Best Beach</option>'
+      sel.innerHTML = '<option value="auto">Auto — Best Beach</option>'
       BEACHES.forEach(b => {
         const opt = document.createElement('option')
         opt.value = b.id
@@ -327,36 +549,70 @@
       sel.value = state.selectedId || 'auto'
     }
 
+    function cacheGet() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY)
+        if (!raw) return null
+        const parsed = JSON.parse(raw)
+        if (!parsed || !Array.isArray(parsed.locations)) return null
+        return parsed
+      } catch (e) {
+        return null
+      }
+    }
+
+    function cacheSet(locations) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ locations, savedAt: Date.now() }))
+      } catch (e) {
+        console.warn('Cache write failed:', e)
+      }
+    }
+
+    function relativeTime(ts) {
+      const mins = Math.max(0, Math.round((Date.now() - ts) / 60000))
+      if (mins < 1) return 'just now'
+      if (mins < 60) return `${mins} min ago`
+      const hrs = Math.round(mins / 60)
+      return `${hrs} hr${hrs > 1 ? 's' : ''} ago`
+    }
+
     async function loadData() {
-      renderWaiting()
+      const cached = cacheGet()
+      const cacheAge = cached ? Date.now() - (cached.savedAt || 0) : Infinity
+
+      if (cached && cacheAge < CACHE_MAX_AGE) {
+        const { results, bestId } = buildResults(cached.locations)
+        state.allData = cached.locations
+        state.results = results
+        state.bestId = bestId
+        const fresh = cacheAge < CACHE_TTL
+        updateView(`Updated ${relativeTime(cached.savedAt)}${fresh ? '' : ' (cached)'}`)
+      } else if (!cached) {
+        renderWaiting()
+      }
+
       try {
         const locations = await fetchAll()
-        const results = {}
-        let bestScore = -1
-        let bestId = BEACHES[0].id
-
-        locations.forEach((loc, i) => {
-          const beach = BEACHES[i]
-          if (!beach) return
-          const result = analyzeBeach(loc, beach)
-          results[beach.id] = result
-          if (result.maxScore > bestScore) {
-            bestScore = result.maxScore
-            bestId = beach.id
-          }
-        })
-
+        cacheSet(locations)
+        const { results, bestId } = buildResults(locations)
         state.allData = locations
         state.results = results
         state.bestId = bestId
-        if (state.selectedId === 'auto') {
-          populateSelect()
-        }
-        updateView()
+        if (state.selectedId === 'auto') populateSelect()
+        updateView(`Updated ${relativeTime(Date.now())}`)
       } catch (err) {
         console.error(err)
-        renderError(err.message)
+        if (!cached) renderError(err.message)
       }
+    }
+
+    function scheduleAutoRefresh() {
+      setInterval(() => {
+        const cached = cacheGet()
+        const age = cached ? Date.now() - (cached.savedAt || 0) : Infinity
+        if (age >= CACHE_TTL) loadData()
+      }, AUTO_REFRESH_MS)
     }
 
     $('#beach').addEventListener('change', e => {
@@ -376,6 +632,7 @@
 
     populateSelect()
     loadData()
+    scheduleAutoRefresh()
   </script>
 </body>
 </html>

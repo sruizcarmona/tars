@@ -1,1 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basque Surf Check</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M5,60 C20,15 40,60 55,60 C70,60 80,15 95,45' fill='none' stroke='%23059669' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='65' cy='30' r='4' fill='%23059669'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { transition: background-color 0.6s ease, color 0.6s ease; }
+    #verdict { transition: transform 0.3s ease; }
+    #verdict:hover { transform: scale(1.02); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .fade-in-delayed { animation: fadeIn 0.5s ease 0.3s forwards; opacity: 0; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center font-sans bg-white text-gray-900 antialiased select-none">
+  <div class="absolute top-6 left-6 right-6 flex items-center justify-between gap-3 z-10">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold tracking-widest uppercase text-gray-400 hidden sm:inline">Basque Surf</span>
+      <select id="beach" class="text-sm font-medium bg-transparent border-0 border-b-2 border-gray-200 py-1 pr-6 outline-none cursor-pointer focus:border-gray-400 text-gray-700">
+        <option value="auto">Auto — Best Beach</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="btnAuto" title="Find best beach" class="text-lg leading-none px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-yellow-500">&starf;</button>
+      <button id="btnRefresh" title="Refresh" class="text-sm px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400">&olarr;</button>
+    </div>
+  </div>
 
+  <main class="text-center px-6 py-20">
+    <div class="mb-4 text-xs font-medium tracking-widest uppercase text-gray-400 fade-in" id="beachName">&nbsp;</div>
+    <div id="verdict" class="text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-200">
+      ?
+    </div>
+    <div class="mt-4 text-base font-medium text-gray-300 fade-in-delayed" id="timeWindow">&nbsp;</div>
+    <div class="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400 fade-in-delayed" id="metrics">
+      <span>...</span>
+    </div>
+    <div class="mt-10 text-[10px] text-gray-200" id="updated"></div>
+  </main>
+
+  <div id="dayBar" class="fixed bottom-0 left-0 right-0 flex items-stretch justify-center gap-0 overflow-x-auto px-0 py-0 z-20"></div>
+
+  <script>
+    const BEACHES = [
+      { id: 'zarautz', name: 'Zarautz', lat: 43.284, lon: -2.171, offshoreMin: 140, offshoreMax: 220 },
+      { id: 'mundaka', name: 'Mundaka', lat: 43.407, lon: -2.697, offshoreMin: 150, offshoreMax: 230 },
+      { id: 'sopelana', name: 'Sopelana', lat: 43.382, lon: -2.983, offshoreMin: 140, offshoreMax: 220 },
+      { id: 'plentzia', name: 'Plentzia', lat: 43.406, lon: -2.950, offshoreMin: 140, offshoreMax: 220 },
+      { id: 'bakio', name: 'Bakio', lat: 43.427, lon: -2.811, offshoreMin: 150, offshoreMax: 230 },
+      { id: 'donostia', name: 'Donostia', lat: 43.318, lon: -1.982, offshoreMin: 150, offshoreMax: 230 },
+    ]
+
+    const TRIGGERS = { go: { text: 'GO SURFING', bg: 'bg-emerald-50', textClr: 'text-emerald-600', dot: 'bg-emerald-400' }, not: { text: 'NO', bg: 'bg-red-50', textClr: 'text-red-400', dot: 'bg-red-300' }, wait: { text: '?', bg: 'bg-white', textClr: 'text-gray-200', dot: 'bg-gray-300' } }
+
+    const state = { allData: null, results: {}, bestId: null, selectedId: 'auto' }
+
+    const $ = s => document.querySelector(s)
+    const $$ = s => document.querySelectorAll(s)
+
+    function fmtTime(iso) {
+      const d = new Date(iso)
+      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' })
+    }
+
+    function fmtHour(iso) {
+      const d = new Date(iso)
+      return d.getHours().toString().padStart(2, '0') + ':00'
+    }
+
+    function scoreWave(waveHeight, wavePeriod, windSpeed, windDir, offshoreMin, offshoreMax) {
+      if (waveHeight == null || wavePeriod == null) return 0
+      if (waveHeight < 0.5 || wavePeriod < 6) return 0
+      let s = 0
+      if (waveHeight >= 1.0 && waveHeight <= 2.5) s += 40
+      else if ((waveHeight >= 0.6 && waveHeight < 1.0) || (waveHeight > 2.5 && waveHeight <= 3.5)) s += 20
+      else if (waveHeight >= 0.5 && waveHeight < 0.6) s += 5
+      if (wavePeriod >= 12) s += 30
+      else if (wavePeriod >= 9) s += 25
+      else if (wavePeriod >= 7) s += 15
+      else if (wavePeriod >= 6) s += 5
+      if (windSpeed != null) {
+        if (windSpeed < 8) s += 20
+        else if (windSpeed < 15) s += 15
+        else if (windSpeed < 25) s += 5
+      }
+      if (windDir != null) {
+        if (windDir >= offshoreMin && windDir <= offshoreMax) s += 10
+        else {
+          const dist = Math.min(Math.abs(windDir - offshoreMin), Math.abs(windDir - offshoreMax))
+          if (dist <= 30) s += 5
+        }
+      }
+      return s
+    }
+
+    function analyzeBeach(data, beach) {
+      if (!data || !data.hourly) return { maxScore: 0, bestHour: null, days: [] }
+      const { hourly } = data
+      const times = hourly.time
+      if (!times || !times.length) return { maxScore: 0, bestHour: null, days: [] }
+
+      const now = new Date()
+      const scores = []
+      for (let i = 0; i < times.length; i++) {
+        const t = new Date(times[i])
+        if (t <= now) continue
+        const hour = parseInt(times[i].substring(11, 13), 10)
+        if (hour < 7 || hour > 21) continue
+        const wh = hourly.wave_height
+        const wp = hourly.wave_period
+        const ws = hourly.wind_speed_10m
+        const wd = hourly.wind_direction_10m
+        const sh = wh && wh.length > i ? wh[i] : null
+        const sp = wp && wp.length > i ? wp[i] : null
+        const ss = ws && ws.length > i ? ws[i] : null
+        const sd = wd && wd.length > i ? wd[i] : null
+        const score = scoreWave(sh, sp, ss, sd, beach.offshoreMin, beach.offshoreMax)
+        scores.push({ idx: i, score, time: times[i], wh: sh, wp: sp, ws: ss, wd: sd })
+      }
+
+      if (scores.length === 0) return { maxScore: 0, bestHour: null, days: [] }
+
+      const todayStr = times[0].substring(0, 10)
+      const dayMap = {}
+      for (const s of scores) {
+        const d = s.time.substring(0, 10)
+        if (!dayMap[d]) dayMap[d] = []
+        dayMap[d].push(s)
+      }
+
+      const sortedDates = Object.keys(dayMap).sort()
+      const days = []
+      let overallMax = -1
+      let overallBest = null
+
+      for (const date of sortedDates) {
+        const entries = dayMap[date]
+        let bi = 0
+        for (let i = 1; i < entries.length; i++) {
+          if (entries[i].score > entries[bi].score) bi = i
+        }
+        const b = entries[bi]
+        const ms = Math.round(b.score)
+
+        const dObj = new Date(date + 'T12:00:00')
+        const tObj = new Date(todayStr + 'T12:00:00')
+        const diff = Math.round((dObj - tObj) / 86400000)
+        const label = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : dObj.toLocaleDateString('en', { weekday: 'short' })
+
+        days.push({ date, label, maxScore: ms, bestHour: { time: b.time, wh: b.wh, wp: b.wp, ws: b.ws, wd: b.wd } })
+
+        if (ms > overallMax) {
+          overallMax = ms
+          overallBest = b
+        }
+      }
+
+      return {
+        maxScore: overallMax,
+        bestHour: overallBest ? { time: overallBest.time, wh: overallBest.wh, wp: overallBest.wp, ws: overallBest.ws, wd: overallBest.wd } : null,
+        days,
+      }
+    }
+
+    async function fetchJSON(url, label) {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`${label} returned status ${res.status}`)
+      const json = await res.json()
+      if (!Array.isArray(json)) throw new Error(`${label} returned non-array: ${JSON.stringify(json).slice(0,200)}`)
+      return json
+    }
+
+    function safeArr(v) { return Array.isArray(v) ? v : [] }
+
+    async function fetchAll() {
+      const lats = BEACHES.map(b => b.lat).join(',')
+      const lons = BEACHES.map(b => b.lon).join(',')
+      const base = 'forecast_days=4&timezone=Europe/Madrid'
+      const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&hourly=wave_height,wave_period&${base}`
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&hourly=wind_speed_10m,wind_direction_10m&${base}`
+
+      const [marineArr, weatherArr] = await Promise.all([
+        fetchJSON(marineUrl, 'Marine'),
+        fetchJSON(weatherUrl, 'Weather').catch(e => { console.warn('Weather fetch failed:', e); return [] }),
+      ])
+
+      const result = []
+      const count = Math.max(marineArr.length, 1)
+      for (let i = 0; i < count && i < BEACHES.length; i++) {
+        const m = marineArr[i] || {}
+        const w = weatherArr[i] || {}
+        result.push({
+          beachIdx: i,
+          hourly: {
+            time: safeArr(m.hourly && m.hourly.time),
+            wave_height: safeArr(m.hourly && m.hourly.wave_height),
+            wave_period: safeArr(m.hourly && m.hourly.wave_period),
+            wind_speed_10m: safeArr(w.hourly && w.hourly.wind_speed_10m),
+            wind_direction_10m: safeArr(w.hourly && w.hourly.wind_direction_10m),
+          },
+        })
+      }
+      return result
+    }
+
+    function renderVerdict(beach, result) {
+      const isGo = result.maxScore >= 75
+      const trigger = isGo ? TRIGGERS.go : TRIGGERS.not
+
+      document.body.className = `min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none pb-16 ${trigger.bg} ${trigger.textClr}`
+      $('#beachName').textContent = beach ? `${beach.name}` : '\u00a0'
+      $('#beachName').className = `mb-4 text-xs font-medium tracking-widest uppercase ${isGo ? 'text-emerald-500' : 'text-red-400'} fade-in`
+
+      const verdictEl = $('#verdict')
+      verdictEl.textContent = trigger.text
+      verdictEl.className = `text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight ${trigger.textClr}`
+
+      if (result.bestHour) {
+        const h = result.bestHour
+        $('#timeWindow').textContent = isGo ? `Best: ${fmtHour(h.time)}` : '\u2014'
+        $('#timeWindow').className = `mt-4 text-base font-medium fade-in-delayed ${isGo ? 'text-emerald-500' : 'text-red-400'}`
+        const wh = h.wh != null ? `${h.wh.toFixed(1)}m` : '--'
+        const wp = h.wp != null ? `${h.wp}s` : '--'
+        const ws = h.ws != null ? `${Math.round(h.ws)}km/h` : '--'
+        const scorePct = Math.min(100, result.maxScore)
+        const bars = '\u25A0'.repeat(Math.ceil(scorePct / 10)) + '\u25A1'.repeat(10 - Math.ceil(scorePct / 10))
+        $('#metrics').innerHTML = `
+          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${wh}</span>
+          <span class="text-gray-300">|</span>
+          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${wp}</span>
+          <span class="text-gray-300">|</span>
+          <span class="flex items-center gap-1.5"><span class="inline-block w-2 h-2 rounded-full ${trigger.dot}"></span>${ws}</span>
+          <span class="text-gray-300">|</span>
+          <span class="text-[10px] tracking-wider font-mono ${isGo ? 'text-emerald-400' : 'text-red-300'}">${bars} ${result.maxScore}</span>
+        `
+      } else {
+        $('#timeWindow').textContent = 'No forecast available'
+        $('#metrics').innerHTML = '<span>No data for this beach</span>'
+      }
+
+      const now = new Date()
+      $('#updated').textContent = `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+
+      // Bottom bar
+      const barEl = $('#dayBar')
+      if (result.days && result.days.length > 1) {
+        let html = ''
+        for (const d of result.days) {
+          const dayGo = d.maxScore >= 75
+          const dayTrigger = dayGo ? TRIGGERS.go : TRIGGERS.not
+          const bg = dayGo ? 'bg-emerald-500' : 'bg-gray-200'
+          const txt = dayGo ? 'text-white' : 'text-gray-500'
+          const wh = d.bestHour && d.bestHour.wh != null ? `${d.bestHour.wh.toFixed(1)}m` : '--'
+          html += `
+            <div class="flex-1 flex flex-col items-center justify-center gap-0.5 px-2 py-3 ${bg} ${txt} min-w-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider leading-tight">${d.label}</span>
+              <span class="text-[11px] font-black leading-tight ${dayGo ? 'text-white' : 'text-gray-400'}">${dayGo ? 'GO' : 'NO'}</span>
+              <span class="text-[9px] opacity-60 leading-tight">${wh}</span>
+            </div>
+          `
+        }
+        barEl.innerHTML = html
+        barEl.classList.remove('hidden')
+      } else {
+        barEl.classList.add('hidden')
+      }
+    }
+
+    function renderWaiting() {
+      document.body.className = 'min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none bg-white text-gray-200'
+      $('#beachName').textContent = '\u00a0'
+      $('#beachName').className = 'mb-4 text-xs font-medium tracking-widest uppercase text-gray-200 fade-in'
+      $('#verdict').textContent = '?'
+      $('#verdict').className = 'text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-200'
+      $('#timeWindow').textContent = '\u00a0'
+      $('#metrics').innerHTML = '<span class="text-gray-300 animate-pulse">Loading forecast...</span>'
+      $('#updated').textContent = ''
+      $('#dayBar').classList.add('hidden')
+    }
+
+    function renderError(msg) {
+      document.body.className = 'min-h-screen flex flex-col items-center justify-center font-sans antialiased select-none bg-gray-50 text-gray-400'
+      $('#beachName').textContent = '\u00a0'
+      $('#verdict').textContent = '?'
+      $('#verdict').className = 'text-[clamp(4rem,20vw,14rem)] font-black leading-none tracking-tight text-gray-300'
+      $('#timeWindow').textContent = msg || 'Unable to fetch data'
+      $('#metrics').innerHTML = '<span class="text-xs">Check your connection or try again</span>'
+      $('#updated').textContent = ''
+      $('#dayBar').classList.add('hidden')
+    }
+
+    function updateView() {
+      const { results, bestId, selectedId } = state
+      if (Object.keys(results).length === 0) { renderWaiting(); return }
+
+      const beachId = selectedId === 'auto' ? bestId : selectedId
+      const beach = BEACHES.find(b => b.id === beachId)
+      if (!beach || !results[beachId]) { renderWaiting(); return }
+
+      renderVerdict(beach, results[beachId])
+    }
+
+    function populateSelect() {
+      const sel = $('#beach')
+      sel.innerHTML = '<option value="auto">Auto \u2014 Best Beach</option>'
+      BEACHES.forEach(b => {
+        const opt = document.createElement('option')
+        opt.value = b.id
+        opt.textContent = b.name
+        sel.appendChild(opt)
+      })
+      sel.value = state.selectedId || 'auto'
+    }
+
+    async function loadData() {
+      renderWaiting()
+      try {
+        const locations = await fetchAll()
+        const results = {}
+        let bestScore = -1
+        let bestId = BEACHES[0].id
+
+        locations.forEach((loc, i) => {
+          const beach = BEACHES[i]
+          if (!beach) return
+          const result = analyzeBeach(loc, beach)
+          results[beach.id] = result
+          if (result.maxScore > bestScore) {
+            bestScore = result.maxScore
+            bestId = beach.id
+          }
+        })
+
+        state.allData = locations
+        state.results = results
+        state.bestId = bestId
+        if (state.selectedId === 'auto') {
+          populateSelect()
+        }
+        updateView()
+      } catch (err) {
+        console.error(err)
+        renderError(err.message)
+      }
+    }
+
+    $('#beach').addEventListener('change', e => {
+      state.selectedId = e.target.value
+      updateView()
+    })
+
+    $('#btnAuto').addEventListener('click', () => {
+      state.selectedId = 'auto'
+      populateSelect()
+      updateView()
+    })
+
+    $('#btnRefresh').addEventListener('click', () => {
+      loadData()
+    })
+
+    populateSelect()
+    loadData()
+  </script>
+</body>
+</html>

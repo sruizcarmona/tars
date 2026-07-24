@@ -26,7 +26,9 @@ from pathlib import Path
 import requests
 
 API_BASE = "https://www.polaraccesslink.com/v3"
-TOKEN_URL = "https://www.polaraccesslink.com/v3/oauth2/token"
+TOKEN_URL = "https://polarremote.com/v2/oauth2/token"
+# User-link (one-time browser step) lives on flow.polar.com, not polaraccesslink.com
+# Use: https://flow.polar.com/oauth2/authorization?response_type=code&client_id=YOUR_ID
 TOKEN_CACHE = Path.home() / ".config" / "polar" / "tokens.json"
 INBOX = Path("/home/ubuntu/.openclaw/workspace/inbox")
 

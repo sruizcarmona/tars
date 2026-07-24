@@ -1,0 +1,119 @@
+#!/bin/bash
+# polar-link-and-test — full atomic Polar auth flow.
+# Exchanges code + immediately registers + immediately tests data access.
+# All in one shot, to avoid Polar's code expiry.
+#
+# Usage:
+#   ./bin/polar-link-and-test <authorization_code>
+#
+# Get the code from the redirect URL after clicking the auth link.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+set -a; source .env; set +a
+
+CODE="${1:-}"
+if [ -z "$CODE" ]; then
+  echo "Usage: $0 <authorization_code>"
+  echo ""
+  echo "Step 1: Visit this URL, log in to Polar, click Allow:"
+  echo "  https://flow.polar.com/oauth2/authorization?response_type=code&client_id=${POLAR_CLIENT_ID}"
+  echo ""
+  echo "Step 2: Browser lands on a 'site not found' page. Copy the code from the URL."
+  echo "  The code is the part after '?code=' and before '&state=' (or end of URL)."
+  echo ""
+  echo "Step 3: Run this script with the code as the first argument."
+  exit 1
+fi
+
+echo "=== Step 1: Exchange code for access token ==="
+TOKEN_RESP=$(curl -sS -X POST https://polarremote.com/v2/oauth2/token \
+  -u "$POLAR_CLIENT_ID:$POLAR_CLIENT_SECRET" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Accept: application/json;charset=UTF-8" \
+  --data-urlencode "grant_type=authorization_code" \
+  --data-urlencode "code=$CODE" \
+  -w "\n__HTTP__:%{http_code}")
+
+REG_CODE=$(echo "$TOKEN_RESP" | grep -oP '__HTTP__:\K\d+')
+TOKEN_BODY=$(echo "$TOKEN_RESP" | sed 's/__HTTP__:.*$//')
+
+if [ "$REG_CODE" != "200" ]; then
+  echo "HTTP $REG_CODE"
+  echo "$TOKEN_BODY"
+  echo ""
+  echo "❌ Token exchange failed. Most likely the code expired (>2 min old)."
+  echo "Re-click the auth URL and try again with a fresh code."
+  exit 1
+fi
+
+ACCESS_TOKEN=$(echo "$TOKEN_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+USER_ID=$(echo "$TOKEN_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['x_user_id'])")
+EXPIRES_IN=$(echo "$TOKEN_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['expires_in'])")
+
+echo "✅ Token obtained"
+echo "   x_user_id:     $USER_ID"
+echo "   expires_in:    $EXPIRES_IN sec (~$(($EXPIRES_IN / 86400)) days)"
+echo "   token (last 6): ...${ACCESS_TOKEN: -6}"
+
+# Cache token
+mkdir -p ~/.config/polar
+cat > ~/.config/polar/tokens.json <<EOF
+{
+  "access_token": "***",
+  "x_user_id": "$USER_ID",
+  "fetched_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "expires_in": $EXPIRES_IN,
+  "scopes": "accesslink.read_all"
+}
+EOF
+chmod 600 ~/.config/polar/tokens.json
+echo "   cached:        ~/.config/polar/tokens.json"
+echo ""
+
+echo "=== Step 2: Register user (POST /v3/users) ==="
+REG_RESP=$(curl -sS -X POST https://www.polaraccesslink.com/v3/users \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"member-id":"tars-polarpower-max"}' \
+  -w "\n__HTTP__:%{http_code}")
+REG_HTTP=$(echo "$REG_RESP" | grep -oP '__HTTP__:\K\d+')
+REG_BODY=$(echo "$REG_RESP" | sed 's/__HTTP__:.*$//')
+echo "HTTP $REG_HTTP"
+echo "$REG_BODY" | python3 -m json.tool 2>/dev/null || echo "$REG_BODY"
+
+if [ "$REG_HTTP" != "200" ]; then
+  echo ""
+  echo "❌ Registration failed. Possible causes:"
+  echo "   - User not yet approved the client in Polar Flow account (Settings → Approved partners)"
+  echo "   - Client missing 'accesslink.read_all' scope"
+  echo "   - Access token rejected by API"
+  exit 1
+fi
+echo "✅ User registered"
+echo ""
+
+echo "=== Step 3: Verify with GET /v3/users/{x_user_id} ==="
+ME_RESP=$(curl -sS "https://www.polaraccesslink.com/v3/users/$USER_ID" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Accept: application/json" \
+  -w "\n__HTTP__:%{http_code}")
+ME_HTTP=$(echo "$ME_RESP" | grep -oP '__HTTP__:\K\d+')
+ME_BODY=$(echo "$ME_RESP" | sed 's/__HTTP__:.*$//')
+echo "HTTP $ME_HTTP"
+echo "$ME_BODY" | python3 -m json.tool 2>/dev/null || echo "$ME_BODY"
+echo ""
+
+echo "=== Step 4: List recent exercises (GET /v3/exercises) ==="
+EX_RESP=$(curl -sS "https://www.polaraccesslink.com/v3/exercises" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Accept: application/json" \
+  -w "\n__HTTP__:%{http_code}")
+EX_HTTP=$(echo "$EX_RESP" | grep -oP '__HTTP__:\K\d+')
+EX_BODY=$(echo "$EX_RESP" | sed 's/__HTTP__:.*$//')
+echo "HTTP $EX_HTTP"
+echo "$EX_BODY" | python3 -m json.tool 2>/dev/null || echo "$EX_BODY"
+echo ""
+
+echo "=== Done ==="

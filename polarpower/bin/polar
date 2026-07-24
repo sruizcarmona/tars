@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Polar CLI wrapper — auto-loads .env and runs src/polar.py
+# Usage: bin/polar auth | list | pull ...
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [[ -f "$HERE/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$HERE/.env"
+  set +a
+else
+  echo "ERROR: $HERE/.env not found. Copy .env.example and fill in creds." >&2
+  exit 2
+fi
+
+exec python3 "$HERE/src/polar.py" "$@"

@@ -1,0 +1,17 @@
+# Secrets — never commit
+.env
+*.env
+!.env.example
+
+# Cached OAuth tokens (contain live bearer)
+.tokens/
+
+# Downloaded rides
+inbox/
+*.tcx
+*.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/

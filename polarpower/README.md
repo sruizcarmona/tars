@@ -1,45 +1,75 @@
 # polarpower
 
-CLI to pull cycling (and other) exercises from Polar Flow → TCX files, with a planned analyzer pass on top.
+CLI to pull cycling (and other) exercises from Polar Flow → TCX files, with optional power analysis.
 
-## What this is
+## Auth flow (important!)
 
-Polar AccessLink uses **OAuth2 client_credentials** for machine-to-machine access. No browser, no user redirect — but the Polar admin form still asks for a redirect URL. We just put `https://localhost` there; it's never used.
+This uses Polar's **OAuth2 authorization_code** flow with explicit user registration (`POST /v3/users`). Not client_credentials.
+
+**Why not client_credentials?** That grant type looks like it works (you get a token) but it can't access user data. You MUST use `authorization_code` to get a user-level token.
 
 ## Setup (one-time)
 
-1. Create a Polar AccessLink client at https://admin.polaraccesslink.com
-   - Redirect URL: `https://localhost` (placeholder, never invoked)
-   - Scopes: `exercise`, `activity`, `physical_info` — grant all, your data, no downside
-2. Link the client to your Polar user (one-time browser step):
-   ```
-   https://www.polaraccesslink.com/v3/oauth2/authorization?response_type=code&client_id=YOUR_CLIENT_ID&scope=exercise
-   ```
-   Log in → click Allow → done. Future pulls are fully automatic.
-3. Copy `.env.example` → `.env`, fill in client_id + secret:
-   ```bash
-   cp .env.example .env
-   $EDITOR .env
-   ```
+### 1. Register an API client
+- Go to https://admin.polaraccesslink.com
+- Create a client with **authorization_code** grant type
+- Set a redirect URL (e.g., `https://localhost` — just needs to be a valid URL, the redirect will fail in browser but the code will be in the URL)
+- Copy the `client_id` and `client_secret`
+
+### 2. Configure credentials
+```bash
+cp .env.example .env
+# Edit .env with your client_id and client_secret
+```
+
+### 3. Register the user
+```bash
+# This will print an authorization URL
+bin/polar register
+
+# Open that URL in your browser, log into Polar Flow, authorize
+# Your browser will redirect to a failing page — copy the full URL with ?code=*** from the address bar
+# Then run:
+bin/polar register --code 'https://localhost/?code=...'
+
+# Verify it worked:
+bin/polar auth
+```
+
+**Gotchas (read these):**
+- ❌ Never reuse an authorization code — Polar revokes it after one exchange
+- ❌ Don't skip `POST /v3/users` — this is the user registration step we originally missed
+- ❌ Don't send a JSON body to the registration endpoint — empty body causes 400
+- ❌ The redirect URL in the auth URL must exactly match what you registered (including port/path if any)
+- ⚠️ Polar only returns data uploaded **after** user registration — rides uploaded before won't appear
 
 ## Usage
 
 ```bash
-# Load env vars
-set -a && source .env && set +a
+# List exercises in the last 30 days
+bin/polar list
 
-# Validate creds (and confirm user link is active)
-python3 src/polar.py auth
+# List only from last 7 days
+bin/polar list --days 7
 
-# List recent exercises
-python3 src/polar.py list --days 30
+# Download the most recent exercise as TCX
+bin/polar pull --latest
 
-# Pull the most recent exercise as TCX
-python3 src/polar.py pull --latest
+# Download + run power analysis
+bin/polar pull --latest --analyze
 
-# Pull + run the ride analyzer (weight from $RIDER_WEIGHT_KG, FTP from $FTP_W)
-python3 src/polar.py pull --latest --analyze
+# Validate cached tokens
+bin/polar auth
 ```
+
+## Available data endpoints
+
+| Endpoint | Type | What it gives |
+|---|---|---|
+| `GET /v3/exercises` | Non-transactional | Last 30 days of exercises |
+| `GET /v3/users/sleep/` | Non-transactional | Sleep data (score, stages, interruptions) |
+| `GET /v3/users/nightly-recharge/` | Non-transactional | Nightly recharge status |
+| `GET /v3/exercises/{id}/tcx` | File download | Gzipped TCX with GPS + HR + power data |
 
 ## Project layout
 
@@ -49,10 +79,22 @@ polarpower/
 ├── .env               # real secrets (git-ignored)
 ├── bin/polar          # convenience wrapper that loads .env + runs the CLI
 ├── src/polar.py       # the CLI
-├── docs/              # notes (setup, API quirks, analysis ideas)
+├── docs/              # notes (setup, API quirks)
 └── inbox/             # downloaded TCX files (git-ignored)
 ```
 
-## Why client_credentials and not the regular OAuth flow?
+## Auth flow reference (the full story)
 
-Polar's `client_credentials` flow gives us a token that lets us read **our own** data forever, no user interaction per call. The catch: it needs a one-time browser step to register our client against our user. After that, fully headless. Perfect for cron + automation.
+If you need to re-do the auth or set this up on a new machine, here's the exact flow:
+
+```
+1. User visits: https://flow.polar.com/oauth2/authorization?response_type=code&client_id=<ID>
+2. Logs in → authorizes → browser redirects to <redirect_url>?code=<AUTH_CODE>
+3. POST https://polarremote.com/v2/oauth2/token  (Basic Auth, grant_type=authorization_code)
+   → Response: { access_token, x_user_id, ... }
+4. POST https://www.polaraccesslink.com/v3/users  (Bearer token, no body)
+   → 200 OK or 409 Conflict (already registered)
+5. Cache token + x_user_id, done.
+```
+
+Full details in the Polar AccessLink skill (pending in Skill Workshop).

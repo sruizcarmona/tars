@@ -32,9 +32,9 @@ TOKEN_URL = "https://polarremote.com/v2/oauth2/token"
 TOKEN_CACHE = Path.home() / ".config" / "polar" / "tokens.json"
 INBOX = Path("/home/ubuntu/.openclaw/workspace/inbox")
 
-# Default redirect — must match what you registered in Polar admin panel.
-# You can override via POLAR_REDIRECT_URL env var or in .env
-DEFAULT_REDIRECT_URI = "http://localhost:5000/oauth2_callback"
+# Optional redirect URI. Only set if your Polar admin panel requires one.
+# Leave empty to let Polar use its default. Override via POLAR_REDIRECT_URL.
+DEFAULT_REDIRECT_URI = ""
 
 
 def get_credentials():
@@ -176,42 +176,45 @@ def cmd_register(args):
 
     print(f"  ✓ Token received! (x_user_id: {x_user_id})")
 
-    # Register user with the client application
+    # Register user with the client application (POST /v3/users, no body)
     print("\n  → Registering user with AccessLink...")
     register_headers = {
         "Authorization": f"Bearer {user_access_token}",
-        "Content-Type": "application/json",
         "Accept": "application/json",
     }
     register_resp = requests.post(
         f"{API_BASE}/users",
         headers=register_headers,
-        json={},
         timeout=30,
     )
     if register_resp.status_code == 409:
-        # 409 Conflict = already registered, which is fine
         print("  ✓ User already registered (409 — OK, continuing)")
-    elif register_resp.status_code != 200:
-        print(f"ERROR: User registration failed: {register_resp.status_code}", file=sys.stderr)
-        print(f"       {register_resp.text[:300]}", file=sys.stderr)
-        sys.exit(1)
-    else:
+    elif register_resp.status_code == 200:
         print("  ✓ User registered successfully!")
+    else:
+        print(f"  ✗ Registration returned {register_resp.status_code}", file=sys.stderr)
+        print(f"    Body: {register_resp.text[:500]}", file=sys.stderr)
+        print()
+        print("  Trying to use the token anyway... (registration may not be required)")
 
-    # Cache tokens
+    # Cache tokens regardless
     cache = {
         "access_token": user_access_token,
         "x_user_id": x_user_id,
         "scopes": token_data.get("scopes", ""),
         "registered_at": datetime.now(timezone.utc).isoformat(),
     }
-    # Copy over register-related stuff if Polar returns it
-    for k in ("member_id", "polar_user_id", "first_name"):
-        if k in register_resp.json() if register_resp.status_code == 200 else {}:
-            cache[k] = register_resp.json()[k]
 
-    # Also preserve any existing reg info if 409
+    # Try to extract registration info from response if 200
+    try:
+        if register_resp.status_code == 200:
+            reg_data = register_resp.json()
+            for k in ("member_id", "polar_user_id", "first_name"):
+                if k in reg_data:
+                    cache[k] = reg_data[k]
+    except Exception:
+        pass
+
     if register_resp.status_code == 409:
         cache["note"] = "User was already registered (prev OK)"
 
@@ -291,14 +294,24 @@ def cmd_list(args):
 
 
 def format_duration(d):
+    """Polar returns ISO 8601 duration like PT1H13M4S or PT2118.710S (seconds-based)."""
     if not d:
         return "0:00"
     s = str(d)
     if s.startswith("PT"):
-        hours = int(m.group(1)) if (m := re.search(r"(\d+)H", s)) else 0
-        mins = int(m.group(1)) if (m := re.search(r"(\d+)M", s)) else 0
-        secs = int(m.group(1)) if (m := re.search(r"(\d+)S", s)) else 0
-        return f"{hours}:{mins:02d}:{secs:02d}"
+        total_secs = 0.0
+        import re
+        # Match hours, minutes, seconds components
+        if m := re.search(r"(\d+(?:\.\d+)?)H", s):
+            total_secs += float(m.group(1)) * 3600
+        if m := re.search(r"(\d+(?:\.\d+)?)M", s):
+            total_secs += float(m.group(1)) * 60
+        if m := re.search(r"(\d+(?:\.\d+)?)S", s):
+            total_secs += float(m.group(1))
+        h = int(total_secs // 3600)
+        m = int((total_secs % 3600) // 60)
+        sec = int(total_secs % 60)
+        return f"{h}:{m:02d}:{sec:02d}"
     if ":" in s:
         parts = s.split(":")
         if len(parts) >= 3:

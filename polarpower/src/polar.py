@@ -108,44 +108,41 @@ def cmd_register(args):
     cid, sec = get_credentials()
     redirect_uri = get_redirect_uri()
 
-    # Build authorization URL
-    params = {
-        "response_type": "code",
-        "client_id": cid,
-    }
-    if redirect_uri:
-        params["redirect_uri"] = redirect_uri
     from urllib.parse import urlencode
-    auth_url = f"{AUTH_URL}?{urlencode(params)}"
+    auth_url = f"{AUTH_URL}?{urlencode({'response_type': 'code', 'client_id': cid, 'redirect_uri': redirect_uri})}"
 
-    print("=" * 60)
-    print("  POLAR ACCESSLINK — USER REGISTRATION")
-    print("=" * 60)
-    print()
-    print("Step 1 — Open this URL in your browser:")
-    print()
-    print(f"  {auth_url}")
-    print()
-    print("Step 2 — Log in to Polar Flow and authorize access.")
-    print()
-    print("Step 3 — After authorizing, your browser will redirect")
-    print("         to a URL that looks like:")
-    print(f"         {redirect_uri}?code=XXXXXXXXXX")
-    print()
-    print("         That page will probably show an error — that's OK.")
-    print("         Copy the ENTIRE redirect URL from the address bar")
-    print("         and paste it below:")
-    print()
-
-    reply = input("Pasted redirect URL > ").strip()
+    if not args.code:
+        # Just print instructions
+        print("=" * 60)
+        print("  POLAR ACCESSLINK — USER REGISTRATION")
+        print("=" * 60)
+        print()
+        print("Step 1 — Open this URL in your browser:")
+        print()
+        print(f"  {auth_url}")
+        print()
+        print("Step 2 — Log in to Polar Flow and authorize access.")
+        print()
+        print("Step 3 — After authorizing, your browser will redirect")
+        print("         to a URL that looks like:")
+        print(f"         {redirect_uri}?code=***")
+        print()
+        print("         That page will probably show an error — that's OK.")
+        print("         Copy the ENTIRE redirect URL from the address bar")
+        print("         and send it to me.")
+        print()
+        print(f"  {auth_url}")
+        print()
+        return
 
     # Extract authorization code
+    reply = args.code.strip()
     match = re.search(r"[?&]code=([^&]+)", reply)
-    if not match:
-        print("ERROR: Could not find authorization code in that URL.", file=sys.stderr)
-        print(f"       Expected a URL containing ?code=...", file=sys.stderr)
-        sys.exit(1)
-    authorization_code = match.group(1)
+    if match:
+        authorization_code = match.group(1)
+    else:
+        # Assume it's just the raw code
+        authorization_code = reply
     print(f"  ✓ Got authorization code: {authorization_code[:20]}...")
 
     # Exchange code for access token
@@ -387,6 +384,7 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sp_reg = sub.add_parser("register", help="Authorize + register user (one-time setup)")
+    sp_reg.add_argument("--code", help="Authorization code from the redirect URL (paste the whole URL)")
     sp_reg.set_defaults(func=cmd_register)
 
     sp_auth = sub.add_parser("auth", help="Validate cached tokens")

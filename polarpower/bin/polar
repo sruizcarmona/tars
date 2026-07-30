@@ -1,0 +1,8 @@
+#!/bin/bash
+# Wrapper for Polar AccessLink CLI
+set -e
+export POLAR_REPO="/home/ubuntu/github/tars-openclaw/polarpower"
+if [ -f "$POLAR_REPO/.env" ]; then
+    set -a; source "$POLAR_REPO/.env"; set +a
+fi
+python3 "$POLAR_REPO/src/polar.py" "$@"

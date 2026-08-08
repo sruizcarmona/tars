@@ -278,14 +278,14 @@ def cmd_list(args):
     print(f"{'date':<22} {'sport':<12} {'duration':>10} {'id':<20}  name")
     print("-" * 100)
     for ex in exercises:
-        st = ex.get("start-time", "")[:19].replace("T", " ")
+        st = ex.get("start_time", "")[:19].replace("T", " ")
         sport = ex.get("sport", "?")
         dur = format_duration(ex.get("duration", "PT0S"))
         eid = ex.get("id", "")[:18]
         name = ex.get("name") or ex.get("device-name", "")
         if cutoff:
             try:
-                ex_dt = datetime.fromisoformat(ex["start-time"].replace("Z", ""))
+                ex_dt = datetime.fromisoformat(ex["start_time"].replace("Z", ""))
                 if ex_dt < cutoff:
                     continue
             except Exception:
@@ -333,7 +333,7 @@ def find_latest_cycling_exercise():
     if not cycling:
         print("No exercises found.", file=sys.stderr)
         sys.exit(1)
-    cycling.sort(key=lambda e: e.get("start-time", ""), reverse=True)
+    cycling.sort(key=lambda e: e.get("start_time", ""), reverse=True)
     return cycling[0]
 
 
@@ -343,15 +343,13 @@ def cmd_pull(args):
     if args.latest:
         ex = find_latest_cycling_exercise()
         eid = ex["id"]
-        print(f"Latest: {ex.get('start-time')} {ex.get('sport')} [{eid[:18]}]")
+        print(f"Latest: {ex.get('start_time')} {ex.get('sport')} [{eid[:18]}]")
     else:
         eid = args.exercise_id
 
-    # Download TCX
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json",
-    }
+    # Download TCX — NB: the TCX endpoint returns 406 if ANY explicit Accept
+    # header is sent. Omit Accept entirely.
+    headers = {"Authorization": f"Bearer {token}"}
     resp = requests.get(f"{API_BASE}/exercises/{eid}/tcx", headers=headers, timeout=60)
     if resp.status_code != 200:
         print(f"ERROR: TCX download failed: {resp.status_code} {resp.text[:200]}", file=sys.stderr)
@@ -367,7 +365,7 @@ def cmd_pull(args):
     # Get metadata for filename
     meta_resp = user_api_get(f"/exercises/{eid}", token)
     meta = meta_resp.json()
-    start = meta.get("start-time", "unknown")[:19].replace(":", "-").replace("T", "_")
+    start = meta.get("start_time", "unknown")[:19].replace(":", "-").replace("T", "_")
     sport = meta.get("sport", "activity")
     out_name = f"polar_{start}_{sport}.tcx"
     out_path = INBOX / out_name

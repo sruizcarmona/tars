@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Finca Burger — Una noche al año</title>
-  <meta name="description" content="Finca Burger: restaurante familiar en el rural de Castellón. Solo abrimos una noche al año. Burgers de la tierra y bebidas caseras.">
+  <title>Finca Burger — Una nit a l'any</title>
+  <meta name="description" content="Finca Burger: restaurant familiar a Vinaròs (Castelló). Només obrim una nit a l'any. Hamburgueses i begudes de la terra.">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,61 +17,86 @@
   <nav class="nav">
     <img src="assets/logo.jpg" alt="Finca Burger" class="nav-logo">
     <ul class="nav-links">
-      <li><a href="#historia">Historia</a></li>
+      <li><a href="#historia">Història</a></li>
       <li><a href="#menu">Carta</a></li>
-      <li><a href="#noche">La Noche</a></li>
+      <li><a href="#espectacle">Espectacle</a></li>
+      <li><a href="#noche">La Nit</a></li>
       <li><a href="#reservas" class="btn btn-small">Reservar</a></li>
     </ul>
   </nav>
 
   <!-- HERO -->
   <header class="hero">
-    <img src="assets/hero.jpg" alt="La finca al anochecer" class="hero-bg">
+    <img src="assets/hero.jpg" alt="La finca a l'ocàs" class="hero-bg">
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <img src="assets/logo.jpg" alt="Finca Burger" class="hero-logo">
       <h1>FINCA BURGER</h1>
-      <p class="tagline">Restaurante familiar en el rural de Castellón</p>
-      <p class="hero-note">⚠️ Solo abrimos <strong>UNA NOCHE al año</strong></p>
+      <p class="tagline">Restaurant familiar a Vinaròs, Castelló</p>
+      <p class="hero-note">⚠️ Només obrim <strong>UNA NIT a l'any</strong></p>
       <div id="countdown" class="countdown"></div>
-      <a href="#reservas" class="btn btn-big">Reserva tu mesa</a>
+      <a href="#reservas" class="btn btn-big">Reserva la teua taula</a>
     </div>
   </header>
 
-  <!-- HISTORIA -->
+  <!-- HISTÒRIA -->
   <section id="historia" class="section">
     <div class="container narrow">
-      <h2>Nuestra historia</h2>
+      <h2>La nostra història</h2>
       <p>
-        La Finca Burger es una cosa de familia. En una finca perdida entre olivos y almendros
-        del interior de Castellón, la familia monta un chiringuito <strong>una sola noche al año</strong>.
-        Los nietos hacen las burgers, la abuela vigila la limonada, y el tío Paco enciende la parrilla
-        como si fuera el último día.
+        Finca Burger és cosa de família. En una finca entre oliveres i ametllers a Vinaròs (Castelló),
+        la família munta el xiringuito <strong>una sola nit a l'any</strong>.
+        Els néts fan les hamburgueses, l'àvia vigila la limonada i el tio Paco encén la graella
+        com si fóra l'últim dia.
       </p>
       <p>
-        No hay carta eterna, no hay horarios: hay <strong>una noche</strong>, unas cuantas burgers,
-        unas bebidas frías y todo el pueblo (y quien se entere) alrededor de la mesa larga.
+        No hi ha carta eterna ni horaris: hi ha <strong>una nit</strong>, unes quantes hamburgueses,
+        unes begudes ben fredes i tot el poble (i qui s'assabente) al voltant de la taula llarga.
       </p>
       <div class="facts">
-        <div class="fact"><span class="fact-num">1</span><span class="fact-label">noche al año</span></div>
-        <div class="fact"><span class="fact-num">3</span><span class="fact-label">burgers en la carta</span></div>
-        <div class="fact"><span class="fact-num">∞</span><span class="fact-label">limonada casera</span></div>
+        <div class="fact"><span class="fact-num">1</span><span class="fact-label">nit a l'any</span></div>
+        <div class="fact"><span class="fact-num">6</span><span class="fact-label">hamburgueses</span></div>
+        <div class="fact"><span class="fact-num">∞</span><span class="fact-label">limonada casolana</span></div>
       </div>
     </div>
   </section>
 
-  <!-- MENÚ -->
+  <!-- CARTA -->
   <section id="menu" class="section section-dark">
     <div class="container">
       <h2>La carta</h2>
-      <p class="subtitle">Tres burgers. Sin más. Como debe ser.</p>
+      <p class="subtitle">Sis hamburgueses. Sense més. Com ha de ser.</p>
 
       <div class="menu-grid">
         <article class="card">
-          <img src="assets/burger-clasica.jpg" alt="La Clásica">
+          <img src="assets/burger-estiuenca.jpg" alt="La Estiuenca">
           <div class="card-body">
-            <div class="card-head"><h3>La Clásica</h3><span class="price">12 €</span></div>
-            <p>180 g de ternera de la tierra, cheddar fundido, lechuga, tomate y salsa de la casa.</p>
+            <div class="card-head"><h3>La Estiuenca</h3><span class="price">12,50 €</span></div>
+            <p>Hamburguesa d'estiu: pollastre a la brasa, tomàquet, enciam i allioli casolà.</p>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="assets/burger-spqr.jpg" alt="SPQR">
+          <div class="card-body">
+            <div class="card-head"><h3>SPQR</h3><span class="price">13 €</span></div>
+            <p>Provola fosa, pebrera roja torrada i pa de pagès. Senatus Populusque… Finca.</p>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="assets/burger-clasica.jpg" alt="La Típica">
+          <div class="card-body">
+            <div class="card-head"><h3>La Típica</h3><span class="price">12 €</span></div>
+            <p>180 g de carn de la terra, cheddar fos, enciam, tomàquet i salsa de la casa.</p>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="assets/burger-ultrachop.jpg" alt="Ultrachop">
+          <div class="card-body">
+            <div class="card-head"><h3>Ultrachop</h3><span class="price">14,50 €</span></div>
+            <p>Doble carn picada, formatge fos, cogombrets i salsa especial. Sense trellat, sense penediment.</p>
           </div>
         </article>
 
@@ -79,60 +104,83 @@
           <img src="assets/burger-bacon.jpg" alt="La Bacon Finca">
           <div class="card-body">
             <div class="card-head"><h3>La Bacon Finca</h3><span class="price">13,50 €</span></div>
-            <p>Doble smash, bacon crujiente, queso fundido y cebolla caramelizada.</p>
+            <p>Doble smash, bacó cruixent, formatge fos i ceba caramel·litzada.</p>
           </div>
         </article>
 
         <article class="card card-featured">
-          <span class="badge">Especial de la noche</span>
+          <span class="badge">Especial de la nit</span>
           <img src="assets/burger-especial.jpg" alt="La de la Abuela">
           <div class="card-body">
             <div class="card-head"><h3>La de la Abuela</h3><span class="price">14 €</span></div>
-            <p>Huevo frito, patatas de la huerta, cebolla caramelizada y el secreto de la abuela.</p>
+            <p>Ou ferrat, creïlles de l'horta, ceba caramel·litzada i el secret de l'àvia.</p>
           </div>
         </article>
       </div>
 
-      <h3 class="drinks-title">Bebidas</h3>
+      <h3 class="drinks-title">Begudes</h3>
       <div class="drinks">
-        <img src="assets/drinks.jpg" alt="Cerveza artesana y limonada casera" class="drinks-img">
+        <img src="assets/drinks.jpg" alt="Cervesa artesana i limonada casolana" class="drinks-img">
         <ul class="drinks-list">
-          <li><span>Cerveza artesana de Castellón</span><span class="price">3,50 €</span></li>
-          <li><span>Limonada casera de la abuela</span><span class="price">3 €</span></li>
-          <li><span>Vino de la tierra</span><span class="price">2,50 €</span></li>
-          <li><span>Agua / refrescos</span><span class="price">2 €</span></li>
+          <li><span>Cervesa artesana de Castelló</span><span class="price">3,50 €</span></li>
+          <li><span>Limonada casolana de l'àvia</span><span class="price">3 €</span></li>
+          <li><span>Vi de la terra</span><span class="price">2,50 €</span></li>
+          <li><span>Orxata de xufa</span><span class="price">3,50 €</span></li>
+          <li><span>Cava o vermut</span><span class="price">4 €</span></li>
+          <li><span>Aigua / refrescos</span><span class="price">2 €</span></li>
+          <li><span>Cafè / infusions</span><span class="price">1,80 €</span></li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- LA NOCHE -->
-  <section id="noche" class="section">
+  <!-- L'ESPECTACLE -->
+  <section id="espectacle" class="section show-section">
+    <div class="show-marquee">
+      <div class="marquee-track">
+        <span>🎸 XOU EN DIRECTE &nbsp;·&nbsp; MÚSICA &nbsp;·&nbsp; LLUMS &nbsp;·&nbsp; FOC &nbsp;·&nbsp; 🎸 XOU EN DIRECTE &nbsp;·&nbsp; MÚSICA &nbsp;·&nbsp; LLUMS &nbsp;·&nbsp; FOC &nbsp;·&nbsp;</span>
+      </div>
+    </div>
     <div class="container narrow">
-      <h2>La Noche</h2>
+      <h2 class="neon">L'ESPECTACLE</h2>
+      <p class="subtitle">Quan s'acaben les hamburgueses, comença el xou.</p>
+      <img src="assets/show.jpg" alt="Xou en directe a la finca" class="show-img">
       <p>
-        Cada año la fecha es un secreto a voces. Se avisa por el grupo de WhatsApp de la familia,
-        se corre la voz en el pueblo y se acaba llenando la finca. Cuando se acaban las burgers,
-        se acaban las burgers.
+        Música en directe, llums, fum i una nit que no s'acaba mai.
+        Després del sopar, la graella es converteix en escenari.
+        <strong>No te'n vages abans que comence.</strong>
       </p>
-      <div id="countdown-big" class="countdown countdown-big"></div>
-      <p class="small-note">La fecha se confirma por boca a boca. No te la pierdas.</p>
     </div>
   </section>
 
-  <!-- RESERVAS -->
+  <!-- LA NIT -->
+  <section id="noche" class="section">
+    <div class="container narrow">
+      <h2>La Nit</h2>
+      <p>
+        Cada any la data és un secret a crits. S'avisa pel grup de WhatsApp de la família,
+        es corre la veu pel poble i s'acaba omplint la finca.
+        Quan s'acaben les hamburgueses, s'acaben les hamburgueses.
+      </p>
+      <p class="date-line"><strong>12 d'agost · 20:00</strong> — a la finca, com sempre.</p>
+      <div id="countdown-big" class="countdown countdown-big"></div>
+      <p class="small-note">La data es confirma de boca a boca. No te la perdes.</p>
+    </div>
+  </section>
+
+  <!-- RESERVES -->
   <section id="reservas" class="section section-dark">
     <div class="container narrow">
-      <h2>Reserva tu mesa</h2>
-      <p>Mesa larga compartida. La reserva se hace por WhatsApp — sin pagos por adelantado, solo palabra de honor.</p>
-      <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20reservar%20mesa%20para%20la%20noche%20de%20Finca%20Burger" class="btn btn-big" target="_blank" rel="noopener">Reservar por WhatsApp</a>
-      <p class="small-note">Finca Burger · En algún lugar entre olivos y almendros · Castellón, España</p>
+      <h2>Reserva la teua taula</h2>
+      <p>Taula llarga compartida. La reserva es fa per WhatsApp — sense pagaments per avançat, només paraula d'honor.</p>
+      <a href="https://wa.me/34600000000?text=Hola!%20Vull%20reservar%20taula%20per%20a%20la%20nit%20de%20Finca%20Burger" class="btn btn-big" target="_blank" rel="noopener">Reservar per WhatsApp</a>
+      <p class="small-note">Finca Burger · Vinaròs, Castelló</p>
     </div>
   </section>
 
   <footer class="footer">
     <img src="assets/logo.jpg" alt="Finca Burger" class="footer-logo">
-    <p>Finca Burger — una noche al año, desde siempre.</p>
+    <p>Finca Burger — una nit a l'any, de sempre.</p>
   </footer>
 
   <script src="script.js"></script>

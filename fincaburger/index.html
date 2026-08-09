@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finca Burger — Una noche al año</title>
+  <meta name="description" content="Finca Burger: restaurante familiar en el rural de Castellón. Solo abrimos una noche al año. Burgers de la tierra y bebidas caseras.">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <img src="assets/logo.jpg" alt="Finca Burger" class="nav-logo">
+    <ul class="nav-links">
+      <li><a href="#historia">Historia</a></li>
+      <li><a href="#menu">Carta</a></li>
+      <li><a href="#noche">La Noche</a></li>
+      <li><a href="#reservas" class="btn btn-small">Reservar</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <img src="assets/hero.jpg" alt="La finca al anochecer" class="hero-bg">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <img src="assets/logo.jpg" alt="Finca Burger" class="hero-logo">
+      <h1>FINCA BURGER</h1>
+      <p class="tagline">Restaurante familiar en el rural de Castellón</p>
+      <p class="hero-note">⚠️ Solo abrimos <strong>UNA NOCHE al año</strong></p>
+      <div id="countdown" class="countdown"></div>
+      <a href="#reservas" class="btn btn-big">Reserva tu mesa</a>
+    </div>
+  </header>
+
+  <!-- HISTORIA -->
+  <section id="historia" class="section">
+    <div class="container narrow">
+      <h2>Nuestra historia</h2>
+      <p>
+        La Finca Burger es una cosa de familia. En una finca perdida entre olivos y almendros
+        del interior de Castellón, la familia monta un chiringuito <strong>una sola noche al año</strong>.
+        Los nietos hacen las burgers, la abuela vigila la limonada, y el tío Paco enciende la parrilla
+        como si fuera el último día.
+      </p>
+      <p>
+        No hay carta eterna, no hay horarios: hay <strong>una noche</strong>, unas cuantas burgers,
+        unas bebidas frías y todo el pueblo (y quien se entere) alrededor de la mesa larga.
+      </p>
+      <div class="facts">
+        <div class="fact"><span class="fact-num">1</span><span class="fact-label">noche al año</span></div>
+        <div class="fact"><span class="fact-num">3</span><span class="fact-label">burgers en la carta</span></div>
+        <div class="fact"><span class="fact-num">∞</span><span class="fact-label">limonada casera</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENÚ -->
+  <section id="menu" class="section section-dark">
+    <div class="container">
+      <h2>La carta</h2>
+      <p class="subtitle">Tres burgers. Sin más. Como debe ser.</p>
+
+      <div class="menu-grid">
+        <article class="card">
+          <img src="assets/burger-clasica.jpg" alt="La Clásica">
+          <div class="card-body">
+            <div class="card-head"><h3>La Clásica</h3><span class="price">12 €</span></div>
+            <p>180 g de ternera de la tierra, cheddar fundido, lechuga, tomate y salsa de la casa.</p>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="assets/burger-bacon.jpg" alt="La Bacon Finca">
+          <div class="card-body">
+            <div class="card-head"><h3>La Bacon Finca</h3><span class="price">13,50 €</span></div>
+            <p>Doble smash, bacon crujiente, queso fundido y cebolla caramelizada.</p>
+          </div>
+        </article>
+
+        <article class="card card-featured">
+          <span class="badge">Especial de la noche</span>
+          <img src="assets/burger-especial.jpg" alt="La de la Abuela">
+          <div class="card-body">
+            <div class="card-head"><h3>La de la Abuela</h3><span class="price">14 €</span></div>
+            <p>Huevo frito, patatas de la huerta, cebolla caramelizada y el secreto de la abuela.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3 class="drinks-title">Bebidas</h3>
+      <div class="drinks">
+        <img src="assets/drinks.jpg" alt="Cerveza artesana y limonada casera" class="drinks-img">
+        <ul class="drinks-list">
+          <li><span>Cerveza artesana de Castellón</span><span class="price">3,50 €</span></li>
+          <li><span>Limonada casera de la abuela</span><span class="price">3 €</span></li>
+          <li><span>Vino de la tierra</span><span class="price">2,50 €</span></li>
+          <li><span>Agua / refrescos</span><span class="price">2 €</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LA NOCHE -->
+  <section id="noche" class="section">
+    <div class="container narrow">
+      <h2>La Noche</h2>
+      <p>
+        Cada año la fecha es un secreto a voces. Se avisa por el grupo de WhatsApp de la familia,
+        se corre la voz en el pueblo y se acaba llenando la finca. Cuando se acaban las burgers,
+        se acaban las burgers.
+      </p>
+      <div id="countdown-big" class="countdown countdown-big"></div>
+      <p class="small-note">La fecha se confirma por boca a boca. No te la pierdas.</p>
+    </div>
+  </section>
+
+  <!-- RESERVAS -->
+  <section id="reservas" class="section section-dark">
+    <div class="container narrow">
+      <h2>Reserva tu mesa</h2>
+      <p>Mesa larga compartida. La reserva se hace por WhatsApp — sin pagos por adelantado, solo palabra de honor.</p>
+      <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20reservar%20mesa%20para%20la%20noche%20de%20Finca%20Burger" class="btn btn-big" target="_blank" rel="noopener">Reservar por WhatsApp</a>
+      <p class="small-note">Finca Burger · En algún lugar entre olivos y almendros · Castellón, España</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <img src="assets/logo.jpg" alt="Finca Burger" class="footer-logo">
+    <p>Finca Burger — una noche al año, desde siempre.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

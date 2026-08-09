@@ -234,6 +234,20 @@ img { display: block; max-width: 100%; }
   margin-bottom: 2.5rem;
 }
 
+.price-joke {
+  text-align: center;
+  background: rgba(255, 201, 60, 0.1);
+  border: 1.5px dashed rgba(255, 201, 60, 0.5);
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  max-width: 560px;
+  margin: -1.2rem auto 2.5rem;
+  font-size: 0.95rem;
+  color: var(--cream);
+}
+
+.price-joke strong { color: var(--gold); }
+
 .section p { margin-bottom: 1rem; }
 
 .date-line { text-align: center; font-size: 1.15rem; }

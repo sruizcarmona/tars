@@ -1,7 +1,7 @@
 /* Finca Burger — compte enrere cap a l'única nit de l'any */
 
-// ✏️ La pròxima nit: 12 d'agost de 2026 a les 20:00 (hora local, CEST = UTC+2)
-const OPENING_DATE = "2026-08-12T20:00:00+02:00";
+// ✏️ La pròxima nit: dimarts 11 d'agost de 2026 a les 20:00 (hora local, CEST = UTC+2)
+const OPENING_DATE = "2026-08-11T20:00:00+02:00";
 
 function pad(n) {
   return String(n).padStart(2, "0");

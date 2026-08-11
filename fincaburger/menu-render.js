@@ -1,9 +1,9 @@
 /* Finca Burger — renders the menu from menu-data.js (single source of truth).
  * index.html loads this with IMG_BASE = "" (assets/ at site root).
- * orders/ loads its own copy with IMG_BASE = "../".
+ * comandes/ loads its own copy with IMG_BASE = "../".
  */
 (function () {
-  var IMG_BASE = window.IMG_BASE || ""; // site root: ""; orders page: "../" (set before including)
+  var IMG_BASE = window.IMG_BASE || ""; // site root: ""; comandes page: "../" (set before including)
 
   function renderBurgers() {
     // Site page: #menu-grid · Orders page: #burger-grid

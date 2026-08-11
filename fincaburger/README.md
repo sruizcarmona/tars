@@ -1,32 +1,35 @@
 # Finca Burger 🍔🔥
 
-Mockup web para **Finca Burger** — restaurante familiar en el rural de Castellón.
-Solo abren **una noche al año**. Esta web es su carta, su historia y su cuenta atrás.
+Web de mostra per a **Finca Burger** — restaurant familiar a la zona rural de Castelló.
+Només obren **una nit a l'any**. Aquesta web és la seua carta, la seua història i el seu compte enrere.
 
 ## Estructura
 
 ```
 fincaburger/
-├── index.html      → página principal
-├── styles.css      → tema rojo
-├── script.js       → cuenta atrás (una noche al año)
-└── assets/         → logo + fotos generadas
+├── index.html      → pàgina principal
+├── styles.css      → tema roig
+├── script.js       → compte enrere (una nit a l'any)
+├── menu-data.js    → dades del menú (font única: web + comandes)
+├── menu-render.js  → pinta el menú a la pàgina principal
+├── comandes/       → taulell de comandes per als cambrers (localStorage)
+└── assets/         → logo + fotos generades
 ```
 
-## Cambiar la fecha de "La Noche"
+## Canviar la data de "La Nit"
 
 En `script.js`:
 
 ```js
-const NEXT_OPENING = { month: 11, day: 31 }; // mes 0-11, día
+const OPENING_DATE = "2026-08-11T20:00:00+02:00";
 ```
 
-## Publicación
+## Publicació
 
-Accesible vía GitHub Pages en:
+Accesible via GitHub Pages en:
 `https://sruizcarmona.github.io/tars/fincaburger/`
 
-## Créditos
+## Crèdits
 
-- Logo: proporcionado por el cliente
-- Fotos de burgers y finca: generadas con IA (mockup)
+- Logo: proporcionat pel client
+- Fotos de les hamburgueses i la finca: generades amb IA (mostra)

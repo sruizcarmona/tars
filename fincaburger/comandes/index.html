@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finca Burger — Comandes</title>
+  <link rel="icon" type="image/jpeg" href="../assets/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="comandes.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="orders-header">
+    <img src="../assets/logo.jpg" alt="Finca Burger" class="header-logo">
+    <h1>COMANDES</h1>
+    <p class="subtitle">Toca un producte per afegir-lo a la comanda</p>
+  </header>
+
+  <!-- MENU -->
+  <main class="orders-main">
+    <section class="menu-section">
+      <h2 class="section-title">🍔 Hamburgueses</h2>
+      <div class="item-grid" id="burger-grid"></div>
+    </section>
+
+    <section class="menu-section">
+      <h2 class="section-title">🥑 Entrants</h2>
+      <div class="item-list" id="starter-list"></div>
+    </section>
+
+    <section class="menu-section">
+      <h2 class="section-title">🥤 Begudes</h2>
+      <div class="item-list" id="drink-list"></div>
+    </section>
+  </main>
+
+  <!-- CART BAR (sticky bottom) -->
+  <div class="cart-bar" id="cart-bar">
+    <div class="cart-bar-info">
+      <span class="cart-count" id="cart-count">0</span>
+      <span class="cart-label">articles</span>
+      <span class="cart-total" id="cart-total">0,00 €</span>
+    </div>
+    <button class="btn btn-cart" id="open-cart">Veure comanda</button>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <h2>Comanda</h2>
+      <button class="drawer-close" id="close-cart">✕</button>
+    </div>
+
+    <div class="table-row">
+      <label for="table-input">Taula</label>
+      <input type="text" id="table-input" inputmode="numeric" placeholder="Ex: 3" maxlength="6">
+    </div>
+
+    <div class="cart-items" id="cart-items"></div>
+
+    <div class="cart-summary">
+      <div class="summary-row"><span>Total</span><span id="drawer-total">0,00 €</span></div>
+    </div>
+
+    <button class="btn btn-send" id="send-order">📲 Enviar a la cuina</button>
+    <button class="btn btn-clear" id="clear-order">Buida la comanda</button>
+  </aside>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- DATA + LOGIC (comandes.js renders the menu itself, interactively) -->
+  <script src="../menu-data.js"></script>
+  <script src="comandes.js"></script>
+</body>
+</html>

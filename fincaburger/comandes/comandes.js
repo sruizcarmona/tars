@@ -10,7 +10,7 @@
   // Currently same as the bookings number — change if the kitchen has its own.
   const KITCHEN_WA = "34613081091";
   const STORAGE_KEY = "fincaburger_cart_v1";
-  const IMG_BASE = "../"; // we live in /orders/, assets are one level up
+  const IMG_BASE = "../"; // we live in /comandes/, assets are one level up
 
   // ── STATE ──────────────────────────────────────────────
   // cart = { items: { id: qty }, table: "3" }

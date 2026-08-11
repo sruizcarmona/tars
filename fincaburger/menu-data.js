@@ -1,9 +1,9 @@
 /* Finca Burger — MENU DATA (single source of truth)
- * Both index.html (site) and orders/ (order pad) render from this file.
+ * Both index.html (site) and comandes/ (order pad) render from this file.
  * To update the menu: edit here, that's it.
  *
  * img paths are relative filenames; each page prepends its own base
- * ("" for the site root, "../" for orders/).
+ * ("" for the site root, "../" for comandes/).
  *
  * Updated 2026-08-11: MENÚ 5è ANIVERSARI — tot a 5 € (flat price menu).
  *

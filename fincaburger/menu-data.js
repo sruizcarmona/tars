@@ -6,8 +6,11 @@
  * ("" for the site root, "../" for orders/).
  *
  * Updated 2026-08-11: MENÚ 5è ANIVERSARI — tot a 5 € (flat price menu).
+ *
+ * NB: declared with `var` (not const) so it attaches to window in browsers —
+ * menu-render.js reads window.FINCA_MENU.
  */
-const FINCA_MENU = {
+var FINCA_MENU = {
   theme: "Menú del 5è aniversari",
   note: "Tot a 5 €",
   burgers: [

@@ -8,7 +8,7 @@
   function renderBurgers() {
     // Site page: #menu-grid · Orders page: #burger-grid
     var grid = document.getElementById("menu-grid") || document.getElementById("burger-grid");
-    if (!grid || !window.FINCA_MENU) return;
+    if (!grid || typeof FINCA_MENU === "undefined") return;
     FINCA_MENU.burgers.forEach(function (b) {
       var card = document.createElement("article");
       card.className = "card" + (b.badge ? " card-featured" : "");
@@ -46,7 +46,7 @@
   function renderDrinks() {
     // Site page: #drinks-list · Orders page: #drink-list
     var list = document.getElementById("drinks-list") || document.getElementById("drink-list");
-    if (!list || !window.FINCA_MENU) return;
+    if (!list || typeof FINCA_MENU === "undefined") return;
     FINCA_MENU.drinks.forEach(function (d) {
       var li = document.createElement("li");
       var span = document.createElement("span");
@@ -62,7 +62,7 @@
 
   function renderStarters() {
     var list = document.getElementById("starters-list");
-    if (!list || !window.FINCA_MENU || !FINCA_MENU.starters) return;
+    if (!list || typeof FINCA_MENU === "undefined" || !FINCA_MENU.starters) return;
     FINCA_MENU.starters.forEach(function (s) {
       var li = document.createElement("li");
       var span = document.createElement("span");
@@ -78,7 +78,7 @@
 
   function renderDessertsNote() {
     var el = document.getElementById("desserts-note");
-    if (!el || !window.FINCA_MENU || !FINCA_MENU.dessertsNote) return;
+    if (!el || typeof FINCA_MENU === "undefined" || !FINCA_MENU.dessertsNote) return;
     el.textContent = "🍰 Postres: " + FINCA_MENU.dessertsNote;
   }
 

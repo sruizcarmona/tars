@@ -60,6 +60,30 @@
     });
   }
 
+  function renderStarters() {
+    var list = document.getElementById("starters-list");
+    if (!list || !window.FINCA_MENU || !FINCA_MENU.starters) return;
+    FINCA_MENU.starters.forEach(function (s) {
+      var li = document.createElement("li");
+      var span = document.createElement("span");
+      span.textContent = s.name;
+      var price = document.createElement("span");
+      price.className = "price";
+      price.textContent = formatPrice(s.price);
+      li.appendChild(span);
+      li.appendChild(price);
+      list.appendChild(li);
+    });
+  }
+
+  function renderDessertsNote() {
+    var el = document.getElementById("desserts-note");
+    if (!el || !window.FINCA_MENU || !FINCA_MENU.dessertsNote) return;
+    el.textContent = "🍰 Postres: " + FINCA_MENU.dessertsNote;
+  }
+
   renderBurgers();
   renderDrinks();
+  renderStarters();
+  renderDessertsNote();
 })();

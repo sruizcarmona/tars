@@ -35,6 +35,8 @@
   function findItem(id) {
     const b = FINCA_MENU.burgers.find((x) => x.id === id);
     if (b) return { ...b, cat: "burger" };
+    const s = FINCA_MENU.starters && FINCA_MENU.starters.find((x) => x.id === id);
+    if (s) return { ...s, cat: "starter" };
     const d = FINCA_MENU.drinks.find((x) => x.id === id);
     if (d) return { ...d, cat: "drink" };
     return null;
@@ -105,6 +107,28 @@
       row.addEventListener("click", () => addItem(d.id));
       list.appendChild(row);
     });
+
+    // starters (if the menu has them)
+    const starterList = document.getElementById("starter-list");
+    if (starterList && FINCA_MENU.starters) {
+      FINCA_MENU.starters.forEach((s) => {
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.dataset.id = s.id;
+
+        const name = document.createElement("span");
+        name.className = "name";
+        name.textContent = s.name;
+        const price = document.createElement("span");
+        price.className = "price";
+        price.textContent = formatPrice(s.price);
+
+        row.appendChild(name);
+        row.appendChild(price);
+        row.addEventListener("click", () => addItem(s.id));
+        starterList.appendChild(row);
+      });
+    }
   }
 
   // ── CART ACTIONS ───────────────────────────────────────

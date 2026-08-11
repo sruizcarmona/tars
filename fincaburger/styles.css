@@ -458,3 +458,14 @@ img { display: block; max-width: 100%; }
   .countdown-big span { font-size: 2.2rem; }
   .countdown-big div { min-width: 80px; }
 }
+
+/* ---------- DESSERTS NOTE ---------- */
+.desserts-note {
+  margin-top: 1.4rem;
+  text-align: center;
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+  font-style: italic;
+  border-top: 1px dashed rgba(253, 243, 227, 0.15);
+  padding-top: 1.2rem;
+}

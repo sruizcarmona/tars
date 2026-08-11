@@ -68,69 +68,12 @@
       <p class="subtitle">Sis hamburgueses. Sense més. Com ha de ser.</p>
       <p class="price-joke">💸 Els preus són orientatius: <strong>l'àvia ho paga tot</strong>. (No li digueu res.)</p>
 
-      <div class="menu-grid">
-        <article class="card">
-          <img src="assets/burger-estiuenca.jpg" alt="La Estiuenca">
-          <div class="card-body">
-            <div class="card-head"><h3>La Estiuenca</h3><span class="price">12,50 €</span></div>
-            <p>Hamburguesa d'estiu: pollastre a la brasa, tomàquet, enciam i allioli casolà.</p>
-          </div>
-        </article>
-
-        <article class="card">
-          <img src="assets/burger-spqr.jpg" alt="SPQR">
-          <div class="card-body">
-            <div class="card-head"><h3>SPQR</h3><span class="price">13 €</span></div>
-            <p>Provola fosa, pebrera roja torrada i pa de pagès. Senatus Populusque… Finca.</p>
-          </div>
-        </article>
-
-        <article class="card">
-          <img src="assets/burger-clasica.jpg" alt="La Típica">
-          <div class="card-body">
-            <div class="card-head"><h3>La Típica</h3><span class="price">12 €</span></div>
-            <p>180 g de carn de la terra, formatge fos, tomàquet, enciam i ceba. Pa de burger, amb patates fregides.</p>
-          </div>
-        </article>
-
-        <article class="card">
-          <img src="assets/burger-ultrachop.jpg" alt="Ultrachop">
-          <div class="card-body">
-            <div class="card-head"><h3>Ultrachop</h3><span class="price">14,50 €</span></div>
-            <p>Doble carn picada, formatge fos, cogombrets i salsa especial. Sense trellat, sense penediment.</p>
-          </div>
-        </article>
-
-        <article class="card">
-          <img src="assets/burger-bacon.jpg" alt="La Bacon Finca">
-          <div class="card-body">
-            <div class="card-head"><h3>La Bacon Finca</h3><span class="price">13,50 €</span></div>
-            <p>Doble smash, bacó cruixent, formatge fos i ceba caramel·litzada.</p>
-          </div>
-        </article>
-
-        <article class="card card-featured">
-          <span class="badge">Especial de la nit</span>
-          <img src="assets/burger-especial.jpg" alt="La de la Abuela">
-          <div class="card-body">
-            <div class="card-head"><h3>La de la Abuela</h3><span class="price">14 €</span></div>
-            <p>Ou ferrat, creïlles de l'horta, ceba caramel·litzada i el secret de l'àvia.</p>
-          </div>
-        </article>
-      </div>
+      <div class="menu-grid" id="menu-grid"></div>
 
       <h3 class="drinks-title">Begudes</h3>
       <div class="drinks">
         <img src="assets/drinks.jpg" alt="Cervesa artesana i limonada casolana" class="drinks-img">
-        <ul class="drinks-list">
-          <li><span>Cervesa artesana de Castelló</span><span class="price">3,50 €</span></li>
-          <li><span>Limonada casolana de l'àvia</span><span class="price">3 €</span></li>
-          <li><span>Vi de la terra</span><span class="price">2,50 €</span></li>
-          <li><span>Orxata de xufa</span><span class="price">3,50 €</span></li>
-          <li><span>Cava o vermut</span><span class="price">4 €</span></li>
-          <li><span>Aigua / refrescos</span><span class="price">2 €</span></li>
-          <li><span>Cafè / infusions</span><span class="price">1,80 €</span></li>
-        </ul>
+        <ul class="drinks-list" id="drinks-list"></ul>
       </div>
     </div>
   </section>
@@ -184,6 +127,8 @@
     <p>Finca Burger — una nit a l'any, de sempre.</p>
   </footer>
 
+  <script src="menu-data.js"></script>
+  <script src="menu-render.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

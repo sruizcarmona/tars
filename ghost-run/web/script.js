@@ -114,15 +114,15 @@ async function init() {
 
         const $ = (id) => document.getElementById(id);
         const slider = $('dist-slider');
-        const gapEl = $('gap-value');
-        const gapLabel = $('gap-label');
-        const hrEl = $('hr-delta');
-        const paceEl = $('pace-delta');
+        const timeEl = $('time-delta');
+        const timeSub = $('time-sub');
+        const distEl = $('dist-delta');
+        const distSub = $('dist-sub');
         const progressEl = $('progress-label');
         const offsetEl = $('offset-value');
         const resyncBtn = $('resync-btn');
         const playBtn = $('play-btn');
-        const graph = $('gap-graph');
+        const graph = $('profile-chart');
 
         const maxOf = (arr, key) => arr[arr.length - 1][key];
 
@@ -132,24 +132,52 @@ async function init() {
                      gap0: rec.t26 - rec.t25 };
         }
 
+        // shared course length, in metres, after the resync origin
+        function maxDist() {
+            const o = origins();
+            return Math.min(maxOf(ghost, 'distance') - o.d25, maxOf(player, 'distance') - o.d26);
+        }
+
         function axisMax() {
             const o = origins();
             return mode === 'distance'
-                ? Math.min(maxOf(ghost, 'distance') - o.d25, maxOf(player, 'distance') - o.d26)
+                ? maxDist()
                 : Math.min(maxOf(ghost, 't') - o.t25, maxOf(player, 't') - o.t26);
         }
 
-        function gapAt(v, useOffset) {
+        // Both deltas, always - anchored on the 2026 player's current state.
+        //   timeDelta: seconds 2026 needed vs 2025 for the SAME point (>0 = slower)
+        //   distDelta: metres 2026 is ahead at the SAME clock     (<0 = behind)
+        function deltas() {
             const o = origins();
-            const off = useOffset ? offset : 0;
+            const v = parseFloat(slider.value) || 0;
+            let t26cur, d26c;
             if (mode === 'distance') {
-                const g = interp(ghost, 'distance', o.d25 + v + off);
-                const p = interp(player, 'distance', o.d26 + v);
-                return (p.t - g.t) - o.gap0;
+                d26c = v;
+                t26cur = interp(player, 'distance', o.d26 + v).t;
+            } else {
+                t26cur = o.t26 + v;
+                d26c = interp(player, 't', t26cur).distance - o.d26;
             }
-            const g = interp(ghost, 't', o.t25 + v + off);
-            const p = interp(player, 't', o.t26 + v);
-            return (p.distance - o.d26) - (g.distance - o.d25);
+            // same place (the manual nudge adjusts the distance anchor)
+            const gAtD = interp(ghost, 'distance',
+                o.d25 + d26c + (mode === 'distance' ? offset : 0));
+            const timeDelta = (t26cur - gAtD.t) - o.gap0;
+            // same clock (true tracks, no nudge)
+            const gAtT = interp(ghost, 't', o.t25 + (t26cur - o.t26));
+            const distDelta = d26c - (gAtT.distance - o.d25);
+            return { timeDelta, distDelta };
+        }
+
+        // Course position of each year at the current slider moment, for the rings.
+        function ringInfo() {
+            const o = origins();
+            const v = parseFloat(slider.value) || 0;
+            if (mode === 'distance') return { d26c: v, d25c: v + offset };
+            return {
+                d26c: interp(player, 't', o.t26 + v).distance - o.d26,
+                d25c: interp(ghost, 't', o.t25 + v + offset).distance - o.d25,
+            };
         }
 
         function displayOffset() {
@@ -157,35 +185,48 @@ async function init() {
             return `${offset > 0 ? '+' : ''}${offset} ${u}`;
         }
 
-        // --- gap graph ---
+        // --- profile strip ---
         let seriesKey = '', seriesCache = null;
-        // Signed "who is ahead" series: > 0 = 2026 ahead, in the current
-        // mode's unit. Distance mode measures TIME, so a negative time gap
-        // means 2026 is ahead. Time mode measures DISTANCE, so positive is
-        // ahead. Without this the graph was 180 degrees out in Time mode.
-        function aheadness(v) {
-            const g = gapAt(v, false);
-            return mode === 'distance' ? -g : g;
+        // Signed "who is ahead" over the COURSE (x = metres from rejoin):
+        //   > 0 = 2026 ahead. Distance mode measures TIME, so a negative time
+        //   gap means ahead; Time mode measures DISTANCE, so positive = ahead.
+        function aheadnessAtDist(d) {
+            const o = origins();
+            const p = interp(player, 'distance', o.d26 + d);
+            const g = interp(ghost, 'distance', o.d25 + d);
+            const timeDelta = (p.t - g.t) - o.gap0;
+            if (mode === 'distance') return -timeDelta;
+            const gAtT = interp(ghost, 't', o.t25 + (p.t - o.t26));
+            return d - (gAtT.distance - o.d25);
         }
 
         function seriesFor() {
             const key = `${mode}|${resynced}|${rec ? rec.d26 : 0}`;
             if (key === seriesKey && seriesCache) return seriesCache;
-            const max = axisMax();
+            const max = maxDist();
             const N = 260, vals = [];
             let maxAbs = 1;
             for (let i = 0; i <= N; i++) {
-                const g = aheadness(max * i / N);
-                vals.push(g);
-                maxAbs = Math.max(maxAbs, Math.abs(g));
+                const a = aheadnessAtDist(max * i / N);
+                vals.push(a);
+                maxAbs = Math.max(maxAbs, Math.abs(a));
             }
             seriesKey = key;
             seriesCache = { vals, maxAbs, max, N };
             return seriesCache;
         }
 
-        function drawGraph() {
-            const w = graph.clientWidth || 600, h = graph.clientHeight || 56;
+        const altAtDist = (d) => {
+            const o = origins();
+            const lim = maxDist();
+            const dd = Math.max(0, Math.min(lim, d));
+            return interp(player, 'distance', o.d26 + dd).alt;
+        };
+
+        // Course profile: elevation silhouette (lower band), difference overlay
+        // (upper band) and one synced ring per year sitting on the terrain.
+        function drawProfile() {
+            const w = graph.clientWidth || 600, h = graph.clientHeight || 96;
             const dpr = window.devicePixelRatio || 1;
             if (graph.width !== Math.round(w * dpr) || graph.height !== Math.round(h * dpr)) {
                 graph.width = Math.round(w * dpr);
@@ -197,35 +238,91 @@ async function init() {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, w, h);
 
+            const max = maxDist();
+            const X = (d) => (max ? w * Math.max(0, Math.min(max, d)) / max : 0);
+            const N = 260;
+
+            // ---- lower band: elevation silhouette ----
+            const eTop = h * 0.50, eBot = h - 3;
+            const alt = [];
+            let aMin = Infinity, aMax = -Infinity;
+            for (let i = 0; i <= N; i++) {
+                const a = altAtDist(max * i / N);
+                alt.push(a);
+                if (a != null && isFinite(a)) {
+                    aMin = Math.min(aMin, a);
+                    aMax = Math.max(aMax, a);
+                }
+            }
+            if (!isFinite(aMin) || aMax <= aMin) { aMin = 0; aMax = 1; }
+            const AY = (a) => eBot - ((a == null ? aMin : a) - aMin) / (aMax - aMin) * (eBot - eTop);
+
+            ctx.beginPath();
+            ctx.moveTo(0, eBot);
+            for (let i = 0; i <= N; i++) ctx.lineTo(w * i / N, AY(alt[i]));
+            ctx.lineTo(w, eBot);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(150,180,220,0.15)';
+            ctx.fill();
+
+            ctx.beginPath();
+            for (let i = 0; i <= N; i++) {
+                const x = w * i / N, y = AY(alt[i]);
+                if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+            }
+            ctx.strokeStyle = 'rgba(150,180,220,0.55)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // ---- upper band: difference overlay ----
             const S = seriesFor();
-            const mid = h / 2, amp = h / 2 - 3;
+            const mid = h * 0.24, amp = h * 0.21;
             for (let i = 0; i < S.N; i++) {
                 const x0 = w * i / S.N;
                 const bw = Math.max(1, w * (i + 1) / S.N - x0);
-                const a = S.vals[i];                 // > 0 = 2026 ahead
-                const y = mid - (a / S.maxAbs) * amp;   // ahead rises above the line
-                ctx.fillStyle = a > 0 ? 'rgba(76,175,80,0.8)' : 'rgba(244,67,54,0.8)';
+                const a = S.vals[i];                      // > 0 = 2026 ahead
+                const y = mid - (a / S.maxAbs) * amp;     // ahead rises above the line
+                ctx.fillStyle = a > 0 ? 'rgba(76,175,80,0.75)' : 'rgba(244,67,54,0.75)';
                 ctx.fillRect(x0, Math.min(mid, y), bw, Math.abs(y - mid));
             }
-            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(w, mid); ctx.stroke();
 
-            const max = axisMax();
-            const cv = parseFloat(slider.value) || 0;
-            const x = w * (max ? cv / max : 0);
-            ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            // ---- synced ring per year, sitting on the terrain ----
+            const R = ringInfo();
+            const ring = (d, colour, filled) => {
+                const x = X(d), y = AY(altAtDist(d));
+                ctx.beginPath();
+                ctx.arc(x, y, filled ? 4 : 7, 0, Math.PI * 2);
+                if (filled) {
+                    ctx.fillStyle = colour; ctx.fill();
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+                } else {
+                    ctx.strokeStyle = colour; ctx.lineWidth = 3;
+                }
+                ctx.stroke();
+            };
+            ring(R.d25c, '#ffffff', false);   // 2025 ring
+            ring(R.d26c, '#3498db', true);    // 2026 dot
 
+            // ---- playhead ----
+            const xc = X(R.d26c);
+            ctx.strokeStyle = 'rgba(52,152,219,0.9)';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(xc, 0); ctx.lineTo(xc, h); ctx.stroke();
+
+            // ---- labels ----
             ctx.font = '9px sans-serif';
-            ctx.fillStyle = '#4caf50'; ctx.fillText('2026 ahead', 4, 11);
-            ctx.fillStyle = '#f44336'; ctx.fillText('2026 behind', 4, h - 4);
-            // scale hint so it's obvious which unit the bars are in
+            ctx.fillStyle = '#4caf50'; ctx.fillText('2026 ahead', 4, 10);
+            ctx.fillStyle = '#f44336'; ctx.fillText('2026 behind', 4, mid + 11);
             const scale = mode === 'time'
                 ? `\u00b1${Math.round(S.maxAbs)} m`
                 : `\u00b1${fmtGap(S.maxAbs).replace('+', '')}`;
             ctx.fillStyle = '#888'; ctx.textAlign = 'right';
-            ctx.fillText(scale, w - 4, 11);
+            ctx.fillText(scale, w - 4, 10);
+            ctx.fillStyle = '#6f8cb0';
+            ctx.fillText(`elev ${Math.round(aMin)}\u2013${Math.round(aMax)} m`, w - 4, eBot - 2);
             ctx.textAlign = 'left';
         }
 
@@ -233,54 +330,39 @@ async function init() {
         function update() {
             const o = origins();
             const v = parseFloat(slider.value) || 0;
-            let g, p, gapText, gapColor, ahead, progress;
+            let g, p, progress;
 
             if (mode === 'distance') {
                 g = interp(ghost, 'distance', o.d25 + v + offset);
                 p = interp(player, 'distance', o.d26 + v);
-                const gap = (p.t - g.t) - o.gap0;
-                ahead = gap < 0;
-                gapText = fmtGap(gap);
                 progress = `${(v / 1000).toFixed(2)} km`;
             } else {
                 g = interp(ghost, 't', o.t25 + v + offset);
                 p = interp(player, 't', o.t26 + v);
-                const gap = (p.distance - o.d26) - (g.distance - o.d25);
-                ahead = gap > 0;
-                gapText = isFinite(gap)
-                    ? `${gap < 0 ? '\u2212' : '+'}${Math.abs(Math.round(gap))} m` : '--';
                 progress = `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')} elapsed`;
             }
-
-            gapColor = ahead ? 'delta-pos' : 'delta-neg';
-            gapLabel.textContent = (ahead ? '2026 ahead' : '2026 behind')
-                + (resynced ? ' \u00b7 from rejoin' : '');
 
             ghostMarker.setLatLng([g.lat, g.lng]);
             playerMarker.setLatLng([p.lat, p.lng]);
             link.setLatLngs([[g.lat, g.lng], [p.lat, p.lng]]);
-
-            gapEl.textContent = gapText;
-            gapEl.className = `stat-value ${gapColor}`;
             progressEl.textContent = progress;
 
-            if (g.hr != null && p.hr != null) {
-                const d = Math.round(p.hr - g.hr);
-                hrEl.textContent = `${d > 0 ? '+' : ''}${d} bpm`;
-                hrEl.className = `stat-value ${d <= 0 ? 'delta-pos' : 'delta-neg'}`;
-            } else {
-                hrEl.textContent = '--'; hrEl.className = 'stat-value';
-            }
+            // both deltas, always present
+            const D = deltas();
+            const tFaster = D.timeDelta < 0;    // 2026 quicker to this point
+            const dAhead = D.distDelta > 0;     // 2026 further along at this clock
 
-            if (g.pace != null && p.pace != null) {
-                const d = p.pace - g.pace;
-                paceEl.textContent = `${d > 0 ? '+' : '\u2212'}${Math.abs(d).toFixed(2)}`;
-                paceEl.className = `stat-value ${d <= 0 ? 'delta-pos' : 'delta-neg'}`;
-            } else {
-                paceEl.textContent = '--'; paceEl.className = 'stat-value';
-            }
+            timeEl.textContent = fmtGap(D.timeDelta);
+            timeEl.className = `stat-value big ${tFaster ? 'delta-pos' : 'delta-neg'}`;
+            timeSub.textContent = tFaster ? '2026 faster to here' : '2026 slower to here';
 
-            drawGraph();
+            distEl.textContent = isFinite(D.distDelta)
+                ? `${D.distDelta < 0 ? '\u2212' : '+'}${Math.abs(Math.round(D.distDelta))} m`
+                : '--';
+            distEl.className = `stat-value big ${dAhead ? 'delta-pos' : 'delta-neg'}`;
+            distSub.textContent = dAhead ? '2026 ahead' : '2026 behind';
+
+            drawProfile();
         }
 
         // --- playback ---
@@ -362,9 +444,15 @@ async function init() {
         slider.addEventListener('input', () => { stopPlay(); syncPlayFromSlider(); update(); });
 
         graph.addEventListener('click', (e) => {
+            // the profile x-axis is course DISTANCE, so map back to the slider
             const r = graph.getBoundingClientRect();
             const frac = (e.clientX - r.left) / r.width;
-            slider.value = Math.max(0, Math.min(axisMax(), axisMax() * frac));
+            const o = origins();
+            const d = maxDist() * Math.max(0, Math.min(1, frac));
+            const v = mode === 'distance'
+                ? d
+                : (interp(player, 'distance', o.d26 + d).t - o.t26);
+            slider.value = Math.max(0, Math.min(axisMax(), v));
             stopPlay(); syncPlayFromSlider(); update();
         });
 
@@ -397,7 +485,12 @@ async function init() {
                 + ` \u00b7 pace ${s.pace25} \u2192 ${s.pace26} min/km`;
             el.addEventListener('click', () => {
                 setResync(true);
-                slider.value = Math.min(s.start_m, axisMax());
+                const o2 = origins();
+                const dm = Math.min(s.start_m, maxDist());
+                slider.value = mode === 'distance'
+                    ? dm
+                    : Math.max(0, Math.min(axisMax(),
+                        interp(player, 'distance', o2.d26 + dm).t - o2.t26));
                 stopPlay(); syncPlayFromSlider(); update();
             });
             listEl.appendChild(el);

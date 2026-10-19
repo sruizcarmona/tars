@@ -61,8 +61,21 @@ const clampIdx = (arr, key, v) => {
     return i;
 };
 
+// Fail loudly if this script is paired with stale markup (cached page), instead
+// of throwing a cryptic "Cannot read properties of null".
+const REQUIRED_IDS = ['map', 'profile-chart', 'play-btn', 'speed-select',
+    'progress-label', 'resync-btn', 'offset-value', 'time-delta', 'time-sub',
+    'dist-delta', 'dist-sub', 'sections', 'sections-toggle', 'section-list',
+    'route-note', 'off-minus', 'off-plus', 'off-reset'];
+
 async function init() {
     try {
+        const missing = REQUIRED_IDS.filter((id) => !document.getElementById(id));
+        if (missing.length) {
+            throw new Error('page/script version mismatch \u2014 missing element(s): '
+                + missing.join(', ') + '. Hard-refresh (Ctrl/Cmd + Shift + R).');
+        }
+
         const [ghost, player, align, sections] = await Promise.all([
             loadJson('ghost_2025.json'),
             loadJson('ghost_2026.json'),

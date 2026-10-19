@@ -161,6 +161,14 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+    <!-- Cache-busted loader: GitHub Pages caches for 10 min, and a stale
+         script.js + fresh index.html used to throw a null-element error. -->
+    <script>
+        (function () {
+            var s = document.createElement('script');
+            s.src = 'script.js?v=' + Date.now();
+            document.body.appendChild(s);
+        })();
+    </script>
 </body>
 </html>

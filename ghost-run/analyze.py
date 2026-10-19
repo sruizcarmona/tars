@@ -67,7 +67,7 @@ def parse_tcx(path):
 
         lat = _num(block, "LatitudeDegrees")
         lng = _num(block, "LongitudeDegrees")
-        alt = _num(block, "AltitudeMeters", "Altitude") or 0.0
+        alt = _num(block, "AltitudeMeters", "Altitude")
         dist = _num(block, "DistanceMeters", "Distance")
         hr = _num(block, "Value") if "HeartRateBpm" in block else None
         if hr is None:
@@ -81,6 +81,14 @@ def parse_tcx(path):
             "dist": dist,
             "hr": int(hr) if hr is not None else None,
         })
+
+    # forward-fill missing/garbage altitude (trailing trackpoints report 0.0)
+    last_alt = None
+    for p in points:
+        if p["alt"] is None or p["alt"] <= 0:
+            p["alt"] = last_alt if last_alt is not None else 0.0
+        else:
+            last_alt = p["alt"]
     return points
 
 
@@ -200,6 +208,80 @@ def detect_alignment(ghost25, ghost26, cell=25.0, radius=5, near=25.0):
     }
 
 
+def _t_at(arr, value):
+    """Elapsed seconds at a given cumulative distance (arr keyed by 'distance')."""
+    if value <= arr[0]["distance"]:
+        return arr[0]["t"]
+    if value >= arr[-1]["distance"]:
+        return arr[-1]["t"]
+    lo, hi = 0, len(arr) - 1
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if arr[mid]["distance"] <= value:
+            lo = mid
+        else:
+            hi = mid
+    a, b = arr[lo], arr[hi]
+    span = (b["distance"] - a["distance"]) or 1
+    f = (value - a["distance"]) / span
+    return a["t"] + (b["t"] - a["t"]) * f
+
+
+def build_sections(ghost25, ghost26, align, min_len=250.0, win=150.0):
+    """Auto-segment the shared route into climbs/descents/flats with per-section gap."""
+    if not align:
+        return []
+    d25r, d26r = align["reconnect"]["d25"], align["reconnect"]["d26"]
+    pts = [p for p in ghost25 if p["distance"] >= d25r]
+    if len(pts) < 10:
+        return []
+
+    j = 0
+    kinds = []
+    for i, p in enumerate(pts):
+        while j < i and p["distance"] - pts[j]["distance"] > win:
+            j += 1
+        dd = p["distance"] - pts[j]["distance"]
+        grade = (p["alt"] - pts[j]["alt"]) / dd if dd > 10 else 0.0
+        kinds.append("climb" if grade > 0.02 else "descent" if grade < -0.02 else "flat")
+
+    runs, cur, start = [], kinds[0], 0
+    for i in range(1, len(kinds)):
+        if kinds[i] != cur:
+            runs.append([cur, start, i - 1])
+            cur, start = kinds[i], i
+    runs.append([cur, start, len(kinds) - 1])
+
+    merged = []
+    for r in runs:
+        length = pts[r[2]]["distance"] - pts[r[1]]["distance"]
+        if length < min_len and merged:
+            merged[-1][2] = r[2]
+        else:
+            merged.append(list(r))
+
+    out = []
+    for kind, a, b in merged:
+        u0 = pts[a]["distance"] - d25r
+        u1 = pts[b]["distance"] - d25r
+        dist = u1 - u0
+        if dist < 100:
+            continue
+        t25 = pts[b]["t"] - pts[a]["t"]
+        t26 = _t_at(ghost26, d26r + u1) - _t_at(ghost26, d26r + u0)
+        out.append({
+            "type": kind,
+            "start_m": round(u0, 1),
+            "end_m": round(u1, 1),
+            "dist_m": round(dist, 1),
+            "gain_m": round(pts[b]["alt"] - pts[a]["alt"], 1),
+            "gap_s": round(t26 - t25, 1),
+            "pace25": round((t25 / 60.0) / (dist / 1000.0), 3) if dist > 0 else None,
+            "pace26": round((t26 / 60.0) / (dist / 1000.0), 3) if dist > 0 else None,
+        })
+    return out
+
+
 def segment_summary(points):
     segs = {"flats": [], "climbs": [], "descents": []}
     for i in range(1, len(points)):
@@ -286,6 +368,10 @@ def main():
         if align:
             print("alignment: diverge @ %sm, reconnect @ %sm | 2026 has +%sm of extra route" % (
                 align["divergence"]["d26"], align["reconnect"]["d26"], align["extra_m"]))
+            sections = build_sections(ghosts["2025"], ghosts["2026"], align)
+            with open(os.path.join(GHOST_DIR, "sections.json"), "w") as fh:
+                json.dump(sections, fh, indent=2)
+            print("sections: %d segments on shared route" % len(sections))
         else:
             print("alignment: routes appear identical, no detour detected")
 

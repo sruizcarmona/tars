@@ -1,0 +1,192 @@
+[
+  {
+    "type": "descent",
+    "start_m": 10.7,
+    "end_m": 405.5,
+    "dist_m": 394.8,
+    "gain_m": -14.8,
+    "gap_s": 15.1,
+    "pace25": 6.121,
+    "pace26": 6.758
+  },
+  {
+    "type": "climb",
+    "start_m": 408.4,
+    "end_m": 3145.5,
+    "dist_m": 2737.1,
+    "gain_m": 237.9,
+    "gap_s": 4.4,
+    "pace25": 7.782,
+    "pace26": 7.809
+  },
+  {
+    "type": "climb",
+    "start_m": 3149.1,
+    "end_m": 3519.5,
+    "dist_m": 370.4,
+    "gain_m": 14.0,
+    "gap_s": 5.6,
+    "pace25": 4.725,
+    "pace26": 4.979
+  },
+  {
+    "type": "flat",
+    "start_m": 3522.7,
+    "end_m": 4362.5,
+    "dist_m": 839.8,
+    "gain_m": -1.0,
+    "gap_s": 21.3,
+    "pace25": 4.485,
+    "pace26": 4.907
+  },
+  {
+    "type": "climb",
+    "start_m": 4365.7,
+    "end_m": 5066.3,
+    "dist_m": 700.6,
+    "gain_m": 9.6,
+    "gap_s": 14.8,
+    "pace25": 6.28,
+    "pace26": 6.632
+  },
+  {
+    "type": "climb",
+    "start_m": 5069.6,
+    "end_m": 5496.7,
+    "dist_m": 427.1,
+    "gain_m": 6.7,
+    "gap_s": 8.4,
+    "pace25": 5.151,
+    "pace26": 5.48
+  },
+  {
+    "type": "flat",
+    "start_m": 5499.0,
+    "end_m": 5897.4,
+    "dist_m": 398.4,
+    "gain_m": -3.0,
+    "gap_s": 18.6,
+    "pace25": 6.401,
+    "pace26": 7.178
+  },
+  {
+    "type": "descent",
+    "start_m": 5899.5,
+    "end_m": 6230.3,
+    "dist_m": 330.8,
+    "gain_m": -11.2,
+    "gap_s": 18.9,
+    "pace25": 7.608,
+    "pace26": 8.561
+  },
+  {
+    "type": "descent",
+    "start_m": 6233.0,
+    "end_m": 7106.8,
+    "dist_m": 873.8,
+    "gain_m": -97.9,
+    "gap_s": 6.1,
+    "pace25": 4.959,
+    "pace26": 5.076
+  },
+  {
+    "type": "descent",
+    "start_m": 7111.5,
+    "end_m": 7814.4,
+    "dist_m": 702.9,
+    "gain_m": -25.3,
+    "gap_s": -11.2,
+    "pace25": 5.762,
+    "pace26": 5.497
+  },
+  {
+    "type": "climb",
+    "start_m": 7815.6,
+    "end_m": 8204.6,
+    "dist_m": 389.0,
+    "gain_m": 62.1,
+    "gap_s": -23.8,
+    "pace25": 14.91,
+    "pace26": 13.892
+  },
+  {
+    "type": "descent",
+    "start_m": 8206.1,
+    "end_m": 9000.7,
+    "dist_m": 794.6,
+    "gain_m": -82.8,
+    "gap_s": -9.7,
+    "pace25": 6.083,
+    "pace26": 5.879
+  },
+  {
+    "type": "climb",
+    "start_m": 9001.8,
+    "end_m": 9644.1,
+    "dist_m": 642.3,
+    "gain_m": 53.6,
+    "gap_s": -24.8,
+    "pace25": 7.395,
+    "pace26": 6.752
+  },
+  {
+    "type": "flat",
+    "start_m": 9647.7,
+    "end_m": 10270.0,
+    "dist_m": 622.3,
+    "gain_m": 4.3,
+    "gap_s": -9.3,
+    "pace25": 5.196,
+    "pace26": 4.947
+  },
+  {
+    "type": "descent",
+    "start_m": 10271.8,
+    "end_m": 10815.2,
+    "dist_m": 543.4,
+    "gain_m": -10.4,
+    "gap_s": -7.1,
+    "pace25": 5.367,
+    "pace26": 5.15
+  },
+  {
+    "type": "flat",
+    "start_m": 10819.6,
+    "end_m": 11116.6,
+    "dist_m": 297.0,
+    "gain_m": -3.4,
+    "gap_s": 0.9,
+    "pace25": 4.826,
+    "pace26": 4.877
+  },
+  {
+    "type": "descent",
+    "start_m": 11119.4,
+    "end_m": 13317.9,
+    "dist_m": 2198.5,
+    "gain_m": -147.4,
+    "gap_s": -7.4,
+    "pace25": 5.261,
+    "pace26": 5.205
+  },
+  {
+    "type": "descent",
+    "start_m": 13322.2,
+    "end_m": 14120.3,
+    "dist_m": 798.1,
+    "gain_m": -35.5,
+    "gap_s": 10.6,
+    "pace25": 4.239,
+    "pace26": 4.46
+  },
+  {
+    "type": "climb",
+    "start_m": 14125.7,
+    "end_m": 14653.3,
+    "dist_m": 527.6,
+    "gain_m": 16.6,
+    "gap_s": 0.6,
+    "pace25": 4.391,
+    "pace26": 4.409
+  }
+]

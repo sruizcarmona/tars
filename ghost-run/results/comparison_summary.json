@@ -6,26 +6,26 @@
       "avg_pace_min_km": 6.079,
       "avg_hr": 152.2,
       "max_hr": 172,
-      "elev_gain_m": 1008.0
+      "elev_gain_m": 548.0
     },
     "segments": {
       "flats": {
-        "distance_m": 4264.4,
-        "avg_pace_min_km": 5.912,
+        "distance_m": 4269.3,
+        "avg_pace_min_km": 5.913,
         "avg_hr": 157.1,
-        "samples": 1365
+        "samples": 1367
       },
       "climbs": {
-        "distance_m": 5466.2,
+        "distance_m": 5463.6,
         "avg_pace_min_km": 7.56,
         "avg_hr": 146.2,
-        "samples": 2104
+        "samples": 2103
       },
       "descents": {
-        "distance_m": 5755.3,
-        "avg_pace_min_km": 5.72,
+        "distance_m": 5753.0,
+        "avg_pace_min_km": 5.719,
         "avg_hr": 160.1,
-        "samples": 1713
+        "samples": 1712
       }
     }
   },
@@ -36,26 +36,26 @@
       "avg_pace_min_km": 6.022,
       "avg_hr": 147.2,
       "max_hr": 170,
-      "elev_gain_m": 1030.0
+      "elev_gain_m": 565.0
     },
     "segments": {
       "flats": {
-        "distance_m": 4214.3,
-        "avg_pace_min_km": 6.077,
-        "avg_hr": 153.6,
-        "samples": 1368
+        "distance_m": 4220.9,
+        "avg_pace_min_km": 6.075,
+        "avg_hr": 153.5,
+        "samples": 1370
       },
       "climbs": {
-        "distance_m": 5682.8,
-        "avg_pace_min_km": 7.581,
+        "distance_m": 5679.7,
+        "avg_pace_min_km": 7.582,
         "avg_hr": 142.1,
-        "samples": 2228
+        "samples": 2227
       },
       "descents": {
-        "distance_m": 6017.2,
+        "distance_m": 6013.7,
         "avg_pace_min_km": 5.589,
         "avg_hr": 152.9,
-        "samples": 1751
+        "samples": 1750
       }
     }
   }

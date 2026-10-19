@@ -159,6 +159,15 @@ async function init() {
 
         // --- gap graph ---
         let seriesKey = '', seriesCache = null;
+        // Signed "who is ahead" series: > 0 = 2026 ahead, in the current
+        // mode's unit. Distance mode measures TIME, so a negative time gap
+        // means 2026 is ahead. Time mode measures DISTANCE, so positive is
+        // ahead. Without this the graph was 180 degrees out in Time mode.
+        function aheadness(v) {
+            const g = gapAt(v, false);
+            return mode === 'distance' ? -g : g;
+        }
+
         function seriesFor() {
             const key = `${mode}|${resynced}|${rec ? rec.d26 : 0}`;
             if (key === seriesKey && seriesCache) return seriesCache;
@@ -166,7 +175,7 @@ async function init() {
             const N = 260, vals = [];
             let maxAbs = 1;
             for (let i = 0; i <= N; i++) {
-                const g = gapAt(max * i / N, false);
+                const g = aheadness(max * i / N);
                 vals.push(g);
                 maxAbs = Math.max(maxAbs, Math.abs(g));
             }
@@ -193,9 +202,9 @@ async function init() {
             for (let i = 0; i < S.N; i++) {
                 const x0 = w * i / S.N;
                 const bw = Math.max(1, w * (i + 1) / S.N - x0);
-                const g = S.vals[i];
-                const y = mid + (g / S.maxAbs) * amp;
-                ctx.fillStyle = g < 0 ? 'rgba(76,175,80,0.8)' : 'rgba(244,67,54,0.8)';
+                const a = S.vals[i];                 // > 0 = 2026 ahead
+                const y = mid - (a / S.maxAbs) * amp;   // ahead rises above the line
+                ctx.fillStyle = a > 0 ? 'rgba(76,175,80,0.8)' : 'rgba(244,67,54,0.8)';
                 ctx.fillRect(x0, Math.min(mid, y), bw, Math.abs(y - mid));
             }
             ctx.strokeStyle = 'rgba(255,255,255,0.35)';
@@ -211,6 +220,13 @@ async function init() {
             ctx.font = '9px sans-serif';
             ctx.fillStyle = '#4caf50'; ctx.fillText('2026 ahead', 4, 11);
             ctx.fillStyle = '#f44336'; ctx.fillText('2026 behind', 4, h - 4);
+            // scale hint so it's obvious which unit the bars are in
+            const scale = mode === 'time'
+                ? `\u00b1${Math.round(S.maxAbs)} m`
+                : `\u00b1${fmtGap(S.maxAbs).replace('+', '')}`;
+            ctx.fillStyle = '#888'; ctx.textAlign = 'right';
+            ctx.fillText(scale, w - 4, 11);
+            ctx.textAlign = 'left';
         }
 
         // --- main update ---

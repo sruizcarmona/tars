@@ -388,6 +388,18 @@ async function init() {
         });
         if (!sections || !sections.length) listEl.innerHTML = '<div class="sec"><span class="nm">no sections</span></div>';
 
+        // collapsible panel — collapsed by default on narrow screens
+        const sectionsEl = $('sections');
+        const sectionsToggle = $('sections-toggle');
+        sectionsEl.classList.toggle('collapsed', window.innerWidth < 760);
+        const syncToggle = () => sectionsToggle.setAttribute('aria-expanded',
+            String(!sectionsEl.classList.contains('collapsed')));
+        syncToggle();
+        sectionsToggle.addEventListener('click', () => {
+            sectionsEl.classList.toggle('collapsed');
+            syncToggle();
+        });
+
         // route note
         const noteEl = $('route-note');
         if (rec && align.extra_m) {

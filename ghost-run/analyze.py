@@ -372,6 +372,7 @@ def main():
             with open(os.path.join(GHOST_DIR, "sections.json"), "w") as fh:
                 json.dump(sections, fh, indent=2)
             print("sections: %d segments on shared route" % len(sections))
+
         else:
             print("alignment: routes appear identical, no detour detected")
 

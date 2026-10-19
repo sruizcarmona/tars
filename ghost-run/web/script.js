@@ -94,17 +94,21 @@ async function init() {
                 { color: '#3498db', weight: 3, opacity: 0.85 }).addTo(map);
         }
 
-        const ghostMarker = L.circleMarker([ghost[0].lat, ghost[0].lng],
-            { radius: 9, color: '#fff', weight: 2, fillColor: '#fff', fillOpacity: 0.55 }).addTo(map);
+        // player = filled dot, ghost = hollow ring drawn on top so BOTH stay
+        // visible when distance-sync pins the two markers together
         const playerMarker = L.circleMarker([player[0].lat, player[0].lng],
-            { radius: 9, color: '#fff', weight: 2, fillColor: '#3498db', fillOpacity: 1 }).addTo(map);
+            { radius: 7, color: '#fff', weight: 2, fillColor: '#3498db', fillOpacity: 1 }).addTo(map);
+        const ghostMarker = L.circleMarker([ghost[0].lat, ghost[0].lng],
+            { radius: 13, color: '#fff', weight: 3, fillColor: '#fff', fillOpacity: 0 }).addTo(map);
+        const link = L.polyline([],
+            { color: '#ffd24a', weight: 2, dashArray: '5 6', opacity: 0.95 }).addTo(map);
 
         map.fitBounds(L.polyline(player.map(p => [p.lat, p.lng])).getBounds()
             .extend(L.polyline(ghost.map(p => [p.lat, p.lng])).getBounds()), { padding: [40, 40] });
 
         // --- state ---
         let mode = 'distance';
-        let resynced = false;
+        let resynced = !!rec;      // resync ON by default when a detour exists
         let offset = 0;               // manual nudge
         let playing = false, playT = 0, speed = 30, lastTs = null;
 
@@ -238,6 +242,7 @@ async function init() {
 
             ghostMarker.setLatLng([g.lat, g.lng]);
             playerMarker.setLatLng([p.lat, p.lng]);
+            link.setLatLngs([[g.lat, g.lng], [p.lat, p.lng]]);
 
             gapEl.textContent = gapText;
             gapEl.className = `stat-value ${gapColor}`;
@@ -356,6 +361,7 @@ async function init() {
         $('off-reset').addEventListener('click', () => { offset = 0; offsetEl.textContent = displayOffset(); update(); });
 
         if (rec) {
+            resyncBtn.classList.toggle('active', resynced);
             resyncBtn.addEventListener('click', () => setResync(!resynced));
             resyncBtn.textContent = `\u27f3 Resync @ ${(rec.d26 / 1000).toFixed(2)} km`;
         } else {
@@ -387,7 +393,9 @@ async function init() {
         if (rec && align.extra_m) {
             noteEl.textContent = `2026 took a ${align.extra_m} m longer line `
                 + `(diverges ${(align.divergence.d26 / 1000).toFixed(2)} km \u2192 rejoins ${(rec.d26 / 1000).toFixed(2)} km). `
-                + `Resync so both are compared from the rejoin.`;
+                + `Resync is ON by default. In Distance sync both markers are pinned to the same `
+                + `distance, so they overlap \u2014 the gap is TIME at that shared point. `
+                + `Switch to Time sync to watch who is physically ahead.`;
         } else {
             noteEl.textContent = 'Routes are identical \u2014 no resync needed.';
         }

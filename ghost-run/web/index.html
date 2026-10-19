@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Run Visualizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #1a1a1a; color: white; }
+        #map { height: 100vh; width: 100vw; }
+        #hud {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); padding: 15px 25px; border-radius: 12px;
+            display: flex; gap: 30px; z-index: 1000; border: 1px solid #444;
+            backdrop-filter: blur(10px);
+        }
+        .stat { text-align: center; }
+        .stat-label { font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 24px; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .delta-pos { color: #4caf50; }
+        .delta-neg { color: #f44336; }
+        #controls {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 80%; max-width: 600px; z-index: 1000;
+            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px;
+            border: 1px solid #444; backdrop-filter: blur(10px);
+        }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #3498db; }
+        .legend {
+            position: absolute; bottom: 110px; right: 20px;
+            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
+            font-size: 12px; z-index: 1000; border: 1px solid #444;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="hud">
+        <div class="stat">
+            <div class="stat-label">Pace Delta (&Delta;)</div>
+            <div id="pace-delta" class="stat-value">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">HR Delta (&Delta;)</div>
+            <div id="hr-delta" class="stat-value">--</div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="dot" style="background: rgba(255, 255, 255, 0.5)"></div> 2025 Ghost</div>
+        <div class="legend-item"><div class="dot" style="background: #3498db"></div> 2026 Player</div>
+    </div>
+
+    <div id="controls">
+        <input type="range" id="dist-slider" min="0" max="100" value="0" step="0.1">
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

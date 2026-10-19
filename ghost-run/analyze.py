@@ -11,6 +11,7 @@ Outputs:
   results/comparison_summary.json -> overall + flats/climbs/descents stats
 """
 import json
+import math
 import os
 import re
 from datetime import datetime
@@ -129,6 +130,76 @@ def build_ghost(points):
     return ghost
 
 
+def detect_alignment(ghost25, ghost26, cell=25.0, radius=5, near=25.0):
+    """Find where the two routes diverge and where they reconnect.
+
+    Returns the reconnection anchor so the frontend can resync there instead
+    of at distance 0 (2026 took ~500 m of extra route before rejoining).
+    """
+    if not ghost25 or not ghost26:
+        return None
+    mlat = 111132.0
+    mlng = 111320.0 * math.cos(math.radians(ghost26[0]["lat"] or 40.5))
+
+    grid = {}
+    for i, p in enumerate(ghost25):
+        k = (int(p["lat"] * mlat / cell), int(p["lng"] * mlng / cell))
+        grid.setdefault(k, []).append(i)
+
+    sep, match = [None] * len(ghost26), [-1] * len(ghost26)
+    for j, p in enumerate(ghost26):
+        kx, ky = int(p["lat"] * mlat / cell), int(p["lng"] * mlng / cell)
+        best, bi = None, -1
+        for dx in range(-radius, radius + 1):
+            for dy in range(-radius, radius + 1):
+                for i in grid.get((kx + dx, ky + dy), ()):
+                    dm = math.hypot((p["lat"] - ghost25[i]["lat"]) * mlat,
+                                    (p["lng"] - ghost25[i]["lng"]) * mlng)
+                    if best is None or dm < best:
+                        best, bi = dm, i
+        sep[j], match[j] = best, bi
+
+    far = [(s is None or s > near) for s in sep]
+
+    div, run = None, 0
+    for j, f in enumerate(far):
+        if f:
+            run += 1
+            if run >= 5 and div is None:
+                div = j - run + 1
+        else:
+            run = 0
+
+    rec = None
+    if div is not None:
+        for j in range(div + 1, len(far)):
+            if not far[j]:
+                win = far[j:j + 100]
+                if sum(win) <= 0.1 * len(win):
+                    rec = j
+                    break
+
+    if div is None or rec is None:
+        return None
+
+    i25 = match[rec]
+    d25r, d26r = ghost25[i25]["distance"], ghost26[rec]["distance"]
+    t25r, t26r = ghost25[i25]["t"], ghost26[rec]["t"]
+    div25 = match[div] if match[div] >= 0 else 0
+    return {
+        "offset_m": round(d25r - d26r, 1),
+        "extra_m": round(d26r - d25r, 1),
+        "reconnect": {
+            "lat": ghost26[rec]["lat"], "lng": ghost26[rec]["lng"],
+            "d25": d25r, "d26": d26r, "t25": t25r, "t26": t26r,
+        },
+        "divergence": {
+            "d25": ghost25[div25]["distance"] if div25 < len(ghost25) else 0,
+            "d26": ghost26[div]["distance"],
+        },
+    }
+
+
 def segment_summary(points):
     segs = {"flats": [], "climbs": [], "descents": []}
     for i in range(1, len(points)):
@@ -180,6 +251,7 @@ def main():
     os.makedirs(GHOST_DIR, exist_ok=True)
     os.makedirs(RESULTS_DIR, exist_ok=True)
     summary = {}
+    ghosts = {}
 
     for year, path in FILES.items():
         if not os.path.exists(path):
@@ -193,6 +265,7 @@ def main():
             continue
 
         ghost = build_ghost(pts)
+        ghosts[year] = ghost
         with open(os.path.join(GHOST_DIR, "ghost_%s.json" % year), "w") as fh:
             json.dump(ghost, fh)
 
@@ -203,6 +276,18 @@ def main():
 
     with open(os.path.join(RESULTS_DIR, "comparison_summary.json"), "w") as fh:
         json.dump(summary, fh, indent=2)
+
+    # route alignment (detour detection) -> data/ghosts/alignment.json
+    align = None
+    if "2025" in ghosts and "2026" in ghosts:
+        align = detect_alignment(ghosts["2025"], ghosts["2026"])
+        with open(os.path.join(GHOST_DIR, "alignment.json"), "w") as fh:
+            json.dump(align or {}, fh, indent=2)
+        if align:
+            print("alignment: diverge @ %sm, reconnect @ %sm | 2026 has +%sm of extra route" % (
+                align["divergence"]["d26"], align["reconnect"]["d26"], align["extra_m"]))
+        else:
+            print("alignment: routes appear identical, no detour detected")
 
     for y in sorted(summary):
         o = summary[y]["overall"]

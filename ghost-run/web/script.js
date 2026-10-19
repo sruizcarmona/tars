@@ -1,20 +1,21 @@
 // ghost-run :: Mario Kart-style ghost playback
 // 2025 = ghost (white)   2026 = player (blue)
 
-async function loadGhostData(year) {
-    const candidates = [
-        `./data/ghosts/ghost_${year}.json`,
-        `../data/ghosts/ghost_${year}.json`,
-        `/ghost-run/data/ghosts/ghost_${year}.json`,
-        `/tars/ghost-run/data/ghosts/ghost_${year}.json`,
-    ];
-    for (const path of candidates) {
+const DATA_PATHS = (file) => [
+    `./data/ghosts/${file}`,
+    `../data/ghosts/${file}`,
+    `/ghost-run/data/ghosts/${file}`,
+    `/tars/ghost-run/data/ghosts/${file}`,
+];
+
+async function loadJson(file) {
+    for (const path of DATA_PATHS(file)) {
         try {
             const res = await fetch(path);
             if (res.ok) return await res.json();
         } catch (e) { /* try next */ }
     }
-    throw new Error(`ghost_${year}.json not found`);
+    throw new Error(`${file} not found`);
 }
 
 function lerpPoint(a, b, t) {
@@ -45,7 +46,6 @@ function interp(data, key, value) {
 }
 
 function fmtGap(sec) {
-    // signed mm:ss, e.g. "1:05" ahead or "2:13" behind
     const neg = sec < 0;
     const total = Math.round(Math.abs(sec));
     const m = Math.floor(total / 60);
@@ -53,99 +53,136 @@ function fmtGap(sec) {
     return `${neg ? '\u2212' : '+'}${m}:${String(s).padStart(2, '0')}`;
 }
 
-function fmtPace(pace) {
-    if (pace == null) return '--';
-    const m = Math.floor(pace);
-    const s = Math.round((pace - m) * 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
-}
+const clampIdx = (arr, key, v) => {
+    let i = 0;
+    while (i < arr.length && arr[i][key] < v) i++;
+    return i;
+};
 
 async function init() {
     try {
-        const ghost = await loadGhostData('2025');
-        const player = await loadGhostData('2026');
+        const [ghost, player, align] = await Promise.all([
+            loadJson('ghost_2025.json'),
+            loadJson('ghost_2026.json'),
+            loadJson('alignment.json').catch(() => null),
+        ]);
+
+        const rec = align && align.reconnect ? align.reconnect : null;
 
         const map = L.map('map');
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '\u00a9 OpenStreetMap',
         }).addTo(map);
 
-        const ghostLine = L.polyline(ghost.map(p => [p.lat, p.lng]),
+        L.polyline(ghost.map(p => [p.lat, p.lng]),
             { color: '#ffffff', weight: 2, opacity: 0.35 }).addTo(map);
-        const playerLine = L.polyline(player.map(p => [p.lat, p.lng]),
-            { color: '#3498db', weight: 3, opacity: 0.85 }).addTo(map);
+
+        if (rec) {
+            // 2026 detour (before reconnection) highlighted in orange/dashed
+            const bIdx = clampIdx(player, 'distance', rec.d26);
+            L.polyline(player.slice(0, bIdx + 1).map(p => [p.lat, p.lng]),
+                { color: '#e67e22', weight: 3, opacity: 0.95, dashArray: '7 6' }).addTo(map);
+            L.polyline(player.slice(bIdx).map(p => [p.lat, p.lng]),
+                { color: '#3498db', weight: 3, opacity: 0.85 }).addTo(map);
+            L.circleMarker([rec.lat, rec.lng],
+                { radius: 7, color: '#fff', weight: 2, fillColor: '#e67e22', fillOpacity: 1 })
+                .addTo(map).bindTooltip('Reconnection point');
+        } else {
+            L.polyline(player.map(p => [p.lat, p.lng]),
+                { color: '#3498db', weight: 3, opacity: 0.85 }).addTo(map);
+        }
 
         const ghostMarker = L.circleMarker([ghost[0].lat, ghost[0].lng],
             { radius: 9, color: '#fff', weight: 2, fillColor: '#fff', fillOpacity: 0.55 }).addTo(map);
         const playerMarker = L.circleMarker([player[0].lat, player[0].lng],
             { radius: 9, color: '#fff', weight: 2, fillColor: '#3498db', fillOpacity: 1 }).addTo(map);
 
-        const bounds = playerLine.getBounds().extend(ghostLine.getBounds());
-        map.fitBounds(bounds, { padding: [40, 40] });
+        map.fitBounds(L.polyline(player.map(p => [p.lat, p.lng])).getBounds()
+            .extend(L.polyline(ghost.map(p => [p.lat, p.lng])).getBounds()), { padding: [40, 40] });
 
         // --- state ---
         let mode = 'distance';   // 'distance' | 'time'
-        let offset = 0;          // distance mode: metres; time mode: seconds
+        let resynced = false;    // anchor at reconnection instead of activity start
+        let offset = 0;          // manual nudge: metres (distance) or seconds (time)
 
-        const slider = document.getElementById('dist-slider');
-        const gapEl = document.getElementById('gap-value');
-        const gapLabel = document.getElementById('gap-label');
-        const hrEl = document.getElementById('hr-delta');
-        const paceEl = document.getElementById('pace-delta');
-        const progressEl = document.getElementById('progress-label');
-        const offsetEl = document.getElementById('offset-value');
-        const modeDistBtn = document.getElementById('mode-distance');
-        const modeTimeBtn = document.getElementById('mode-time');
+        const $ = (id) => document.getElementById(id);
+        const slider = $('dist-slider');
+        const gapEl = $('gap-value');
+        const gapLabel = $('gap-label');
+        const hrEl = $('hr-delta');
+        const paceEl = $('pace-delta');
+        const progressEl = $('progress-label');
+        const offsetEl = $('offset-value');
+        const resyncBtn = $('resync-btn');
 
         const maxOf = (arr, key) => arr[arr.length - 1][key];
 
-        function axisMax() {
-            return mode === 'distance'
-                ? Math.min(maxOf(ghost, 'distance'), maxOf(player, 'distance'))
-                : Math.min(maxOf(ghost, 't'), maxOf(player, 't'));
+        function origins() {
+            if (!resynced || !rec) return { d25: 0, d26: 0, t25: 0, t26: 0, gap0: 0 };
+            return { d25: rec.d25, d26: rec.d26, t25: rec.t25, t26: rec.t26,
+                     gap0: rec.t26 - rec.t25 };
         }
 
-        function relabelAxis() {
+        function axisMax() {
+            const o = origins();
+            return mode === 'distance'
+                ? Math.min(maxOf(ghost, 'distance') - o.d25, maxOf(player, 'distance') - o.d26)
+                : Math.min(maxOf(ghost, 't') - o.t25, maxOf(player, 't') - o.t26);
+        }
+
+        function displayOffset() {
+            const u = mode === 'distance' ? 'm' : 's';
+            return `${offset > 0 ? '+' : ''}${offset} ${u}`;
+        }
+
+        function relabelAxis(resetOffset) {
             const max = axisMax();
             slider.min = 0;
             slider.max = max;
             slider.step = mode === 'distance' ? 5 : 1;
-            if (parseFloat(slider.value) > max) slider.value = 0;
-            // reset offset when switching axes (unit changes)
-            offset = 0;
-            offsetEl.textContent = mode === 'distance' ? '0 m' : '0 s';
+            slider.value = 0;
+            if (resetOffset) { offset = 0; offsetEl.textContent = displayOffset(); }
             update();
         }
 
         function setMode(next) {
             if (next === mode) return;
             mode = next;
-            modeDistBtn.classList.toggle('active', mode === 'distance');
-            modeTimeBtn.classList.toggle('active', mode === 'time');
-            relabelAxis();
+            $('mode-distance').classList.toggle('active', mode === 'distance');
+            $('mode-time').classList.toggle('active', mode === 'time');
+            relabelAxis(true);
+        }
+
+        function setResync(on) {
+            resynced = on;
+            resyncBtn.classList.toggle('active', resynced);
+            relabelAxis(true);
         }
 
         function update() {
+            const o = origins();
             const v = parseFloat(slider.value);
-            let g, p, ahead, gapText, gapColor, progress;
+            let g, p, ahead, gapText, gapColor, progress, fromNote;
 
             if (mode === 'distance') {
-                g = interp(ghost, 'distance', v + offset);
-                p = interp(player, 'distance', v);
-                const gap = p.t - g.t;            // >0 => 2026 slower here
+                g = interp(ghost, 'distance', o.d25 + v + offset);
+                p = interp(player, 'distance', o.d26 + v);
+                const gap = (p.t - g.t) - o.gap0;
                 ahead = gap < 0;
                 gapText = fmtGap(gap);
                 gapColor = ahead ? 'delta-pos' : 'delta-neg';
-                gapLabel.textContent = ahead ? '2026 ahead (time)' : '2026 behind (time)';
+                gapLabel.textContent = (ahead ? '2026 ahead' : '2026 behind')
+                    + (resynced ? ' \u00b7 from reconnection' : '');
                 progress = `${(v / 1000).toFixed(2)} km`;
             } else {
-                g = interp(ghost, 't', v + offset);
-                p = interp(player, 't', v);
-                const gap = p.distance - g.distance; // >0 => 2026 further along
+                g = interp(ghost, 't', o.t25 + v + offset);
+                p = interp(player, 't', o.t26 + v);
+                const gap = (p.distance - o.d26) - (g.distance - o.d25);
                 ahead = gap > 0;
                 gapText = `${gap < 0 ? '\u2212' : '+'}${Math.abs(Math.round(gap))} m`;
                 gapColor = ahead ? 'delta-pos' : 'delta-neg';
-                gapLabel.textContent = ahead ? '2026 ahead (distance)' : '2026 behind (distance)';
+                gapLabel.textContent = (ahead ? '2026 ahead' : '2026 behind')
+                    + (resynced ? ' \u00b7 from reconnection' : '');
                 progress = `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')} elapsed`;
             }
 
@@ -155,7 +192,6 @@ async function init() {
             gapEl.textContent = gapText;
             gapEl.className = `stat-value ${gapColor}`;
 
-            // HR delta (rounded, no decimals)
             if (g.hr != null && p.hr != null) {
                 const d = Math.round(p.hr - g.hr);
                 hrEl.textContent = `${d > 0 ? '+' : ''}${d} bpm`;
@@ -165,7 +201,6 @@ async function init() {
                 hrEl.className = 'stat-value';
             }
 
-            // Pace delta (2 decimals)
             if (g.pace != null && p.pace != null) {
                 const d = p.pace - g.pace;
                 paceEl.textContent = `${d > 0 ? '+' : '\u2212'}${Math.abs(d).toFixed(2)}`;
@@ -180,20 +215,33 @@ async function init() {
 
         // --- wiring ---
         slider.addEventListener('input', update);
-        modeDistBtn.addEventListener('click', () => setMode('distance'));
-        modeTimeBtn.addEventListener('click', () => setMode('time'));
+        $('mode-distance').addEventListener('click', () => setMode('distance'));
+        $('mode-time').addEventListener('click', () => setMode('time'));
 
-        const step = () => (mode === 'distance' ? 25 : 5); // m or s
-        document.getElementById('off-minus').addEventListener('click', () => { offset -= step(); update(); offsetEl.textContent = displayOffset(); });
-        document.getElementById('off-plus').addEventListener('click', () => { offset += step(); update(); offsetEl.textContent = displayOffset(); });
-        document.getElementById('off-reset').addEventListener('click', () => { offset = 0; update(); offsetEl.textContent = displayOffset(); });
+        const step = () => (mode === 'distance' ? 10 : 5);
+        $('off-minus').addEventListener('click', () => { offset -= step(); offsetEl.textContent = displayOffset(); update(); });
+        $('off-plus').addEventListener('click', () => { offset += step(); offsetEl.textContent = displayOffset(); update(); });
+        $('off-reset').addEventListener('click', () => { offset = 0; offsetEl.textContent = displayOffset(); update(); });
 
-        function displayOffset() {
-            if (mode === 'distance') return `${offset > 0 ? '+' : ''}${offset} m`;
-            return `${offset > 0 ? '+' : ''}${offset} s`;
+        if (rec) {
+            resyncBtn.addEventListener('click', () => setResync(!resynced));
+            resyncBtn.textContent = `\u27f3 Resync @ ${(rec.d26 / 1000).toFixed(2)} km`;
+        } else {
+            resyncBtn.disabled = true;
+            resyncBtn.title = 'No route divergence detected';
         }
 
-        relabelAxis();
+        // detour note
+        const noteEl = $('route-note');
+        if (rec && align.extra_m) {
+            noteEl.textContent = `2026 took a ${align.extra_m} m longer line `
+                + `(diverge ${(align.divergence.d26 / 1000).toFixed(2)} km \u2192 rejoin ${(rec.d26 / 1000).toFixed(2)} km). `
+                + `Resync so both start from the rejoin point.`;
+        } else {
+            noteEl.textContent = 'Routes are identical \u2014 no resync needed.';
+        }
+
+        relabelAxis(true);
         update();
     } catch (err) {
         console.error('ghost-run init failed:', err);

@@ -1,5 +1,5 @@
 async function loadGhostData(year) {
-    const response = await fetch(`../data/ghosts/ghost_${year}.json`);
+    const response = await fetch(`/ghost-run/data/ghosts/ghost_${year}.json`);
     return await response.json();
 }
 

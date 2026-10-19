@@ -1,121 +1,203 @@
+// ghost-run :: Mario Kart-style ghost playback
+// 2025 = ghost (white)   2026 = player (blue)
+
 async function loadGhostData(year) {
-    // Attempt to find the data file relative to the current script location
-    // Works for both local file system and GitHub Pages
-    const paths = [
+    const candidates = [
         `./data/ghosts/ghost_${year}.json`,
         `../data/ghosts/ghost_${year}.json`,
-        `/ghost-run/data/ghosts/ghost_${year}.json`
+        `/ghost-run/data/ghosts/ghost_${year}.json`,
+        `/tars/ghost-run/data/ghosts/ghost_${year}.json`,
     ];
-
-    for (const path of paths) {
+    for (const path of candidates) {
         try {
-            const response = await fetch(path);
-            if (response.ok) return await response.json();
-        } catch (e) {
-            continue;
-        }
+            const res = await fetch(path);
+            if (res.ok) return await res.json();
+        } catch (e) { /* try next */ }
     }
-    throw new Error(`Could not find ghost data for ${year}`);
+    throw new Error(`ghost_${year}.json not found`);
 }
 
-function formatPace(pace) {
-    if (pace === null || pace === undefined) return "--";
-    const minutes = Math.floor(pace);
-    const seconds = Math.round((pace - minutes) * 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+function lerpPoint(a, b, t) {
+    const mix = (k) => {
+        if (a[k] == null) return b[k];
+        if (b[k] == null) return a[k];
+        return a[k] + (b[k] - a[k]) * t;
+    };
+    return {
+        lat: mix('lat'), lng: mix('lng'), alt: mix('alt'),
+        hr: mix('hr'), pace: mix('pace'), distance: mix('distance'), t: mix('t'),
+    };
 }
 
-function interpolate(data, distance) {
-    if (!data || data.length === 0) return null;
-    if (distance <= data[0].distance) return data[0];
-    if (distance >= data[data.length - 1].distance) return data[data.length - 1];
-
-    for (let i = 0; i < data.length - 1; i++) {
-        if (distance >= data[i].distance && distance <= data[i + 1].distance) {
-            const p1 = data[i];
-            const p2 = data[i + 1];
-            const t = (distance - p1.distance) / (p2.distance - p1.distance);
-            
-            return {
-                lat: p1.lat + (p2.lat - p1.lat) * t,
-                lng: p1.lng + (p2.lng - p1.lng) * t,
-                alt: p1.alt + (p2.alt - p1.alt) * t,
-                hr: p1.hr + (p2.hr - p1.hr) * t,
-                pace: p1.pace + (p2.pace - p1.pace) * t,
-                distance: distance
-            };
-        }
+function interp(data, key, value) {
+    if (!data || !data.length) return null;
+    if (value <= data[0][key]) return data[0];
+    const n = data.length;
+    if (value >= data[n - 1][key]) return data[n - 1];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (data[mid][key] <= value) lo = mid; else hi = mid;
     }
+    const a = data[lo], b = data[hi];
+    const span = (b[key] - a[key]) || 1;
+    return lerpPoint(a, b, (value - a[key]) / span);
+}
+
+function fmtGap(sec) {
+    // signed mm:ss, e.g. "1:05" ahead or "2:13" behind
+    const neg = sec < 0;
+    const total = Math.round(Math.abs(sec));
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${neg ? '\u2212' : '+'}${m}:${String(s).padStart(2, '0')}`;
+}
+
+function fmtPace(pace) {
+    if (pace == null) return '--';
+    const m = Math.floor(pace);
+    const s = Math.round((pace - m) * 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 async function init() {
     try {
-        const ghost2025 = await loadGhostData('2025');
-        const player2026 = await loadGhostData('2026');
+        const ghost = await loadGhostData('2025');
+        const player = await loadGhostData('2026');
 
-        const map = L.map('map').setView([ghost2025[0].lat, ghost2025[0].lng], 15);
+        const map = L.map('map');
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
+            attribution: '\u00a9 OpenStreetMap',
         }).addTo(map);
 
-        // Draw paths
-        const path2025 = L.polyline(ghost2025.map(p => [p.lat, p.lng]), {color: 'white', weight: 2, opacity: 0.4}).addTo(map);
-        const path2026 = L.polyline(player2026.map(p => [p.lat, p.lng]), {color: '#3498db', weight: 3, opacity: 0.8}).addTo(map);
+        const ghostLine = L.polyline(ghost.map(p => [p.lat, p.lng]),
+            { color: '#ffffff', weight: 2, opacity: 0.35 }).addTo(map);
+        const playerLine = L.polyline(player.map(p => [p.lat, p.lng]),
+            { color: '#3498db', weight: 3, opacity: 0.85 }).addTo(map);
 
-        // Markers
-        const ghostMarker = L.circleMarker([ghost2025[0].lat, ghost2025[0].lng], {
-            radius: 8, color: 'white', fillOpacity: 0.5, fillWeight: 0
-        }).addTo(map);
-        
-        const playerMarker = L.circleMarker([player2026[0].lat, player2026[0].lng], {
-            radius: 8, color: '#3498db', fillOpacity: 1, fillWeight: 0
-        }).addTo(map);
+        const ghostMarker = L.circleMarker([ghost[0].lat, ghost[0].lng],
+            { radius: 9, color: '#fff', weight: 2, fillColor: '#fff', fillOpacity: 0.55 }).addTo(map);
+        const playerMarker = L.circleMarker([player[0].lat, player[0].lng],
+            { radius: 9, color: '#fff', weight: 2, fillColor: '#3498db', fillOpacity: 1 }).addTo(map);
+
+        const bounds = playerLine.getBounds().extend(ghostLine.getBounds());
+        map.fitBounds(bounds, { padding: [40, 40] });
+
+        // --- state ---
+        let mode = 'distance';   // 'distance' | 'time'
+        let offset = 0;          // distance mode: metres; time mode: seconds
 
         const slider = document.getElementById('dist-slider');
-        const paceDeltaEl = document.getElementById('pace-delta');
-        const hrDeltaEl = document.getElementById('hr-delta');
+        const gapEl = document.getElementById('gap-value');
+        const gapLabel = document.getElementById('gap-label');
+        const hrEl = document.getElementById('hr-delta');
+        const paceEl = document.getElementById('pace-delta');
+        const progressEl = document.getElementById('progress-label');
+        const offsetEl = document.getElementById('offset-value');
+        const modeDistBtn = document.getElementById('mode-distance');
+        const modeTimeBtn = document.getElementById('mode-time');
 
-        const maxDist = Math.min(ghost2025[ghost2025.length - 1].distance, player2026[player2026.length - 1].distance);
-        const minDist = Math.max(ghost2025[0].distance, player2026[0].distance);
-        
-        slider.min = minDist;
-        slider.max = maxDist;
-        slider.value = minDist;
+        const maxOf = (arr, key) => arr[arr.length - 1][key];
 
-        function update() {
-            const dist = parseFloat(slider.value);
-            const p25 = interpolate(ghost2025, dist);
-            const p26 = interpolate(player2026, dist);
-
-            if (!p25 || !p26) return;
-
-            ghostMarker.setLatLng([p25.lat, p25.lng]);
-            playerMarker.setLatLng([p26.lat, p26.lng]);
-
-            // Pace Delta
-            if (p25.pace && p26.pace) {
-                const delta = p26.pace - p25.pace;
-                const sign = delta <= 0 ? '-' : '+';
-                const color = delta <= 0 ? 'delta-pos' : 'delta-neg';
-                paceDeltaEl.textContent = `${sign}${Math.abs(delta).toFixed(2)} min/km`;
-                paceDeltaEl.className = `stat-value ${color}`;
-            }
-
-            // HR Delta
-            if (p25.hr && p26.hr) {
-                const delta = p26.hr - p25.hr;
-                const sign = delta >= 0 ? '+' : '';
-                const color = delta >= 0 ? 'delta-neg' : 'delta-pos';
-                hrDeltaEl.textContent = `${sign}${delta} bpm`;
-                hrDeltaEl.className = `stat-value ${color}`;
-            }
+        function axisMax() {
+            return mode === 'distance'
+                ? Math.min(maxOf(ghost, 'distance'), maxOf(player, 'distance'))
+                : Math.min(maxOf(ghost, 't'), maxOf(player, 't'));
         }
 
-        slider.oninput = update;
+        function relabelAxis() {
+            const max = axisMax();
+            slider.min = 0;
+            slider.max = max;
+            slider.step = mode === 'distance' ? 5 : 1;
+            if (parseFloat(slider.value) > max) slider.value = 0;
+            // reset offset when switching axes (unit changes)
+            offset = 0;
+            offsetEl.textContent = mode === 'distance' ? '0 m' : '0 s';
+            update();
+        }
+
+        function setMode(next) {
+            if (next === mode) return;
+            mode = next;
+            modeDistBtn.classList.toggle('active', mode === 'distance');
+            modeTimeBtn.classList.toggle('active', mode === 'time');
+            relabelAxis();
+        }
+
+        function update() {
+            const v = parseFloat(slider.value);
+            let g, p, ahead, gapText, gapColor, progress;
+
+            if (mode === 'distance') {
+                g = interp(ghost, 'distance', v + offset);
+                p = interp(player, 'distance', v);
+                const gap = p.t - g.t;            // >0 => 2026 slower here
+                ahead = gap < 0;
+                gapText = fmtGap(gap);
+                gapColor = ahead ? 'delta-pos' : 'delta-neg';
+                gapLabel.textContent = ahead ? '2026 ahead (time)' : '2026 behind (time)';
+                progress = `${(v / 1000).toFixed(2)} km`;
+            } else {
+                g = interp(ghost, 't', v + offset);
+                p = interp(player, 't', v);
+                const gap = p.distance - g.distance; // >0 => 2026 further along
+                ahead = gap > 0;
+                gapText = `${gap < 0 ? '\u2212' : '+'}${Math.abs(Math.round(gap))} m`;
+                gapColor = ahead ? 'delta-pos' : 'delta-neg';
+                gapLabel.textContent = ahead ? '2026 ahead (distance)' : '2026 behind (distance)';
+                progress = `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')} elapsed`;
+            }
+
+            ghostMarker.setLatLng([g.lat, g.lng]);
+            playerMarker.setLatLng([p.lat, p.lng]);
+
+            gapEl.textContent = gapText;
+            gapEl.className = `stat-value ${gapColor}`;
+
+            // HR delta (rounded, no decimals)
+            if (g.hr != null && p.hr != null) {
+                const d = Math.round(p.hr - g.hr);
+                hrEl.textContent = `${d > 0 ? '+' : ''}${d} bpm`;
+                hrEl.className = `stat-value ${d <= 0 ? 'delta-pos' : 'delta-neg'}`;
+            } else {
+                hrEl.textContent = '--';
+                hrEl.className = 'stat-value';
+            }
+
+            // Pace delta (2 decimals)
+            if (g.pace != null && p.pace != null) {
+                const d = p.pace - g.pace;
+                paceEl.textContent = `${d > 0 ? '+' : '\u2212'}${Math.abs(d).toFixed(2)}`;
+                paceEl.className = `stat-value ${d <= 0 ? 'delta-pos' : 'delta-neg'}`;
+            } else {
+                paceEl.textContent = '--';
+                paceEl.className = 'stat-value';
+            }
+
+            progressEl.textContent = progress;
+        }
+
+        // --- wiring ---
+        slider.addEventListener('input', update);
+        modeDistBtn.addEventListener('click', () => setMode('distance'));
+        modeTimeBtn.addEventListener('click', () => setMode('time'));
+
+        const step = () => (mode === 'distance' ? 25 : 5); // m or s
+        document.getElementById('off-minus').addEventListener('click', () => { offset -= step(); update(); offsetEl.textContent = displayOffset(); });
+        document.getElementById('off-plus').addEventListener('click', () => { offset += step(); update(); offsetEl.textContent = displayOffset(); });
+        document.getElementById('off-reset').addEventListener('click', () => { offset = 0; update(); offsetEl.textContent = displayOffset(); });
+
+        function displayOffset() {
+            if (mode === 'distance') return `${offset > 0 ? '+' : ''}${offset} m`;
+            return `${offset > 0 ? '+' : ''}${offset} s`;
+        }
+
+        relabelAxis();
         update();
-    } catch (error) {
-        console.error("Initialization failed:", error);
-        alert("Error loading ghost data: " + error.message + ". Please check if the data files exist in the repo.");
+    } catch (err) {
+        console.error('ghost-run init failed:', err);
+        alert('Error loading ghost data: ' + err.message);
     }
 }
 

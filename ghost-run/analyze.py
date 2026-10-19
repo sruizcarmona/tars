@@ -96,14 +96,20 @@ def build_ghost(points):
         else:
             last = p["dist"]
 
+    t0 = pts[0]["t"]
     ghost = []
+    # pace over a ~100 m rolling window (instantaneous 3-sample pace was far too noisy)
+    WIN = 100.0
+    j = 0
     for i, p in enumerate(pts):
+        elapsed = (p["t"] - t0).total_seconds()
+        while j < i and p["dist"] - pts[j]["dist"] > WIN:
+            j += 1
         pace = None
-        j = max(0, i - 3)
         if i > j:
             dt = (p["t"] - pts[j]["t"]).total_seconds()
             dd = p["dist"] - pts[j]["dist"]
-            if dd > 5 and dt > 0:
+            if dd > 10 and dt > 0:
                 pace = (dt / 60.0) / (dd / 1000.0)
         if pace is None:
             for k in range(len(ghost) - 1, -1, -1):
@@ -118,6 +124,7 @@ def build_ghost(points):
             "hr": p["hr"],
             "pace": round(pace, 3) if pace is not None else None,
             "distance": round(p["dist"], 1),
+            "t": round(elapsed, 1),
         })
     return ghost
 

@@ -3,59 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost Run Visualizer</title>
+    <title>ghost-run :: 2025 vs 2026</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #1a1a1a; color: white; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #1a1a1a; color: #fff; }
         #map { height: 100vh; width: 100vw; }
+
         #hud {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); padding: 15px 25px; border-radius: 12px;
-            display: flex; gap: 30px; z-index: 1000; border: 1px solid #444;
-            backdrop-filter: blur(10px);
+            position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.82); padding: 12px 22px; border-radius: 14px;
+            display: flex; gap: 26px; z-index: 1000; border: 1px solid #333;
+            backdrop-filter: blur(10px); align-items: center;
         }
-        .stat { text-align: center; }
-        .stat-label { font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-value { font-size: 24px; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .stat { text-align: center; min-width: 90px; }
+        .stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+        .stat-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        #gap-value { font-size: 30px; }
+        .stat-sub { font-size: 10px; color: #777; margin-top: 3px; }
         .delta-pos { color: #4caf50; }
         .delta-neg { color: #f44336; }
+
         #controls {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            width: 80%; max-width: 600px; z-index: 1000;
-            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px;
-            border: 1px solid #444; backdrop-filter: blur(10px);
+            position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+            width: 86%; max-width: 660px; z-index: 1000;
+            background: rgba(0,0,0,0.82); padding: 16px 20px; border-radius: 16px;
+            border: 1px solid #333; backdrop-filter: blur(10px);
         }
+        .row { display: flex; align-items: center; gap: 10px; }
+        .row + .row { margin-top: 12px; }
         input[type=range] { width: 100%; cursor: pointer; accent-color: #3498db; }
-        .legend {
-            position: absolute; bottom: 110px; right: 20px;
-            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
-            font-size: 12px; z-index: 1000; border: 1px solid #444;
+        #progress-label { font-size: 12px; color: #aaa; font-variant-numeric: tabular-nums; min-width: 120px; text-align: right; }
+
+        .seg { display: inline-flex; border: 1px solid #444; border-radius: 9px; overflow: hidden; }
+        .seg button {
+            background: transparent; color: #ccc; border: 0; padding: 7px 13px;
+            font-size: 12px; cursor: pointer; font-weight: 600;
         }
-        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .seg button.active { background: #3498db; color: #fff; }
+
+        .off-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .05em; }
+        .off-btn {
+            background: #262626; color: #eee; border: 1px solid #444; border-radius: 7px;
+            width: 30px; height: 30px; font-size: 15px; cursor: pointer; line-height: 1;
+        }
+        .off-btn:hover { background: #333; }
+        #offset-value { font-size: 13px; font-variant-numeric: tabular-nums; min-width: 54px; text-align: center; color: #eee; }
+
+        .legend {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(0,0,0,0.82); padding: 10px 12px; border-radius: 10px;
+            font-size: 12px; z-index: 1000; border: 1px solid #333;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-item + .legend-item { margin-top: 5px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; }
     </style>
 </head>
 <body>
     <div id="hud">
         <div class="stat">
-            <div class="stat-label">Pace Delta (&Delta;)</div>
-            <div id="pace-delta" class="stat-value">--</div>
+            <div class="stat-label">Time Gap</div>
+            <div id="gap-value" class="stat-value delta-pos">--</div>
+            <div id="gap-label" class="stat-sub">--</div>
         </div>
         <div class="stat">
-            <div class="stat-label">HR Delta (&Delta;)</div>
+            <div class="stat-label">HR &Delta;</div>
             <div id="hr-delta" class="stat-value">--</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Pace &Delta;</div>
+            <div id="pace-delta" class="stat-value">--</div>
         </div>
     </div>
 
     <div id="map"></div>
 
     <div class="legend">
-        <div class="legend-item"><div class="dot" style="background: rgba(255, 255, 255, 0.5)"></div> 2025 Ghost</div>
-        <div class="legend-item"><div class="dot" style="background: #3498db"></div> 2026 Player</div>
+        <div class="legend-item"><div class="dot" style="background: rgba(255,255,255,0.55)"></div> 2025 &middot; ghost</div>
+        <div class="legend-item"><div class="dot" style="background: #3498db"></div> 2026 &middot; player</div>
     </div>
 
     <div id="controls">
-        <input type="range" id="dist-slider" min="0" max="100" value="0" step="0.1">
+        <div class="row">
+            <input type="range" id="dist-slider" min="0" max="100" value="0" step="5">
+            <span id="progress-label">0.00 km</span>
+        </div>
+        <div class="row">
+            <span class="off-label">Sync by</span>
+            <div class="seg">
+                <button id="mode-distance" class="active">Distance</button>
+                <button id="mode-time">Time</button>
+            </div>
+            <span class="off-label" style="margin-left:auto">Resync offset</span>
+            <button class="off-btn" id="off-minus">&minus;</button>
+            <span id="offset-value">0 m</span>
+            <button class="off-btn" id="off-plus">+</button>
+            <button class="off-btn" id="off-reset" title="Reset offset">&#8635;</button>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

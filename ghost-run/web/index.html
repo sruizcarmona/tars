@@ -138,10 +138,6 @@
     <div id="controls">
         <canvas id="profile-chart"></canvas>
         <div class="row">
-            <input type="range" id="dist-slider" min="0" max="100" value="0" step="5">
-            <span id="progress-label">0.00 km</span>
-        </div>
-        <div class="row">
             <button id="play-btn" class="pill" title="Play / pause">&#9654;</button>
             <select id="speed-select" title="Playback speed">
                 <option value="1">1&times;</option>
@@ -153,15 +149,11 @@
                 <option value="120">120&times;</option>
                 <option value="300">300&times;</option>
             </select>
-            <span class="off-label">Sync by</span>
-            <div class="seg">
-                <button id="mode-distance" class="active">Distance</button>
-                <button id="mode-time">Time</button>
-            </div>
+            <span id="progress-label">0.00 km</span>
             <button id="resync-btn" class="pill">&#8635; Resync</button>
             <span class="off-label" style="margin-left:auto">Nudge</span>
             <button class="off-btn" id="off-minus">&minus;</button>
-            <span id="offset-value">0 m</span>
+            <span id="offset-value">0 s</span>
             <button class="off-btn" id="off-plus">+</button>
             <button class="off-btn" id="off-reset" title="Reset nudge">&#8635;</button>
         </div>

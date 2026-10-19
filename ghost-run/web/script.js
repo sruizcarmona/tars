@@ -107,13 +107,13 @@ async function init() {
             .extend(L.polyline(ghost.map(p => [p.lat, p.lng])).getBounds()), { padding: [40, 40] });
 
         // --- state ---
-        let mode = 'distance';
+        const mode = 'time';       // always a clock-based race replay (no selector)
+        let pos = 0;               // seconds elapsed since the 2026 rejoin
         let resynced = !!rec;      // resync ON by default when a detour exists
-        let offset = 0;               // manual nudge
+        let offset = 0;               // manual nudge (seconds)
         let playing = false, playT = 0, speed = 30, lastTs = null;
 
         const $ = (id) => document.getElementById(id);
-        const slider = $('dist-slider');
         const timeEl = $('time-delta');
         const timeSub = $('time-sub');
         const distEl = $('dist-delta');
@@ -150,7 +150,7 @@ async function init() {
         //   distDelta: metres 2026 is ahead at the SAME clock     (<0 = behind)
         function deltas() {
             const o = origins();
-            const v = parseFloat(slider.value) || 0;
+            const v = pos;
             let t26cur, d26c;
             if (mode === 'distance') {
                 d26c = v;
@@ -169,10 +169,10 @@ async function init() {
             return { timeDelta, distDelta };
         }
 
-        // Course position of each year at the current slider moment, for the rings.
+        // Course position of each year at the current playhead, for the rings.
         function ringInfo() {
             const o = origins();
-            const v = parseFloat(slider.value) || 0;
+            const v = pos;
             if (mode === 'distance') return { d26c: v, d25c: v + offset };
             return {
                 d26c: interp(player, 't', o.t26 + v).distance - o.d26,
@@ -329,18 +329,13 @@ async function init() {
         // --- main update ---
         function update() {
             const o = origins();
-            const v = parseFloat(slider.value) || 0;
+            const v = pos;
             let g, p, progress;
 
-            if (mode === 'distance') {
-                g = interp(ghost, 'distance', o.d25 + v + offset);
-                p = interp(player, 'distance', o.d26 + v);
-                progress = `${(v / 1000).toFixed(2)} km`;
-            } else {
-                g = interp(ghost, 't', o.t25 + v + offset);
-                p = interp(player, 't', o.t26 + v);
-                progress = `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')} elapsed`;
-            }
+            g = interp(ghost, 't', o.t25 + v + offset);
+            p = interp(player, 't', o.t26 + v);
+            const R0 = ringInfo();
+            progress = `${(R0.d26c / 1000).toFixed(2)} / ${(maxDist() / 1000).toFixed(2)} km`;
 
             ghostMarker.setLatLng([g.lat, g.lng]);
             playerMarker.setLatLng([p.lat, p.lng]);
@@ -366,25 +361,14 @@ async function init() {
         }
 
         // --- playback ---
-        function syncPlayFromSlider() {
-            const o = origins();
-            const v = parseFloat(slider.value) || 0;
-            if (mode === 'distance') {
-                const p = interp(player, 'distance', o.d26 + v);
-                playT = p.t;
-            } else {
-                playT = o.t26 + v;
-            }
-        }
-
-        function seekToTime(T) {
-            const o = origins();
-            const p = interp(player, 't', T);
-            let v = mode === 'distance' ? (p.distance - o.d26) : (T - o.t26);
-            v = Math.max(0, Math.min(axisMax(), v));
-            slider.value = v;
+        // single source of truth for the playhead: seconds since the rejoin
+        function setPos(v) {
+            pos = Math.max(0, Math.min(axisMax(), v));
+            playT = origins().t26 + pos;
             update();
         }
+
+        function seekToTime(T) { setPos(T - origins().t26); }
 
         function stopPlay() { playing = false; playBtn.innerHTML = '&#9654;'; }
 
@@ -410,26 +394,14 @@ async function init() {
         });
         $('speed-select').addEventListener('change', (e) => { speed = parseFloat(e.target.value) || 1; });
 
-        // --- axis / mode / resync ---
-        function relabelAxis(resetOffset) {
+        // --- resync ---
+        function resetView(resetOffset) {
             const o = origins();
-            slider.min = 0;
-            slider.max = axisMax();
-            slider.step = mode === 'distance' ? 5 : 1;
-            slider.value = 0;
+            pos = 0;
             playT = o.t26;
             if (resetOffset) { offset = 0; offsetEl.textContent = displayOffset(); }
             seriesKey = '';
             update();
-        }
-
-        function setMode(next) {
-            if (next === mode) return;
-            stopPlay();
-            mode = next;
-            $('mode-distance').classList.toggle('active', mode === 'distance');
-            $('mode-time').classList.toggle('active', mode === 'time');
-            relabelAxis(true);
         }
 
         function setResync(on) {
@@ -437,27 +409,19 @@ async function init() {
             stopPlay();
             resynced = on;
             resyncBtn.classList.toggle('active', resynced);
-            relabelAxis(true);
+            resetView(true);
         }
 
-        // --- wiring ---
-        slider.addEventListener('input', () => { stopPlay(); syncPlayFromSlider(); update(); });
-
+        // --- wiring --- (the profile strip IS the scrubber)
         graph.addEventListener('click', (e) => {
-            // the profile x-axis is course DISTANCE, so map back to the slider
+            // profile x-axis is course DISTANCE; convert the click to a clock pos
             const r = graph.getBoundingClientRect();
             const frac = (e.clientX - r.left) / r.width;
             const o = origins();
             const d = maxDist() * Math.max(0, Math.min(1, frac));
-            const v = mode === 'distance'
-                ? d
-                : (interp(player, 'distance', o.d26 + d).t - o.t26);
-            slider.value = Math.max(0, Math.min(axisMax(), v));
-            stopPlay(); syncPlayFromSlider(); update();
+            stopPlay();
+            setPos(interp(player, 'distance', o.d26 + d).t - o.t26);
         });
-
-        $('mode-distance').addEventListener('click', () => setMode('distance'));
-        $('mode-time').addEventListener('click', () => setMode('time'));
 
         const step = () => (mode === 'distance' ? 10 : 5);
         $('off-minus').addEventListener('click', () => { offset -= step(); offsetEl.textContent = displayOffset(); update(); });
@@ -487,11 +451,8 @@ async function init() {
                 setResync(true);
                 const o2 = origins();
                 const dm = Math.min(s.start_m, maxDist());
-                slider.value = mode === 'distance'
-                    ? dm
-                    : Math.max(0, Math.min(axisMax(),
-                        interp(player, 'distance', o2.d26 + dm).t - o2.t26));
-                stopPlay(); syncPlayFromSlider(); update();
+                stopPlay();
+                setPos(interp(player, 'distance', o2.d26 + dm).t - o2.t26);
             });
             listEl.appendChild(el);
         });
@@ -514,14 +475,14 @@ async function init() {
         if (rec && align.extra_m) {
             noteEl.textContent = `2026 took a ${align.extra_m} m longer line `
                 + `(diverges ${(align.divergence.d26 / 1000).toFixed(2)} km \u2192 rejoins ${(rec.d26 / 1000).toFixed(2)} km). `
-                + `Resync is ON by default. In Distance sync both markers are pinned to the same `
-                + `distance, so they overlap \u2014 the gap is TIME at that shared point. `
-                + `Switch to Time sync to watch who is physically ahead.`;
+                + `Resync is ON, so both years are compared from the rejoin, where the gap starts at zero. `
+                + `Both markers run on the same clock at their real recorded speeds \u2014 `
+                + `press play, or click the profile to jump.`;
         } else {
             noteEl.textContent = 'Routes are identical \u2014 no resync needed.';
         }
 
-        relabelAxis(true);
+        resetView(true);
         update();
     } catch (err) {
         console.error('ghost-run init failed:', err);
